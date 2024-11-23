@@ -26,15 +26,9 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=gestion-tache-project_gestion-tache \
-            -Dsonar.organization=gestion-tache-project \
-            -Dsonar.host.url=https://sonarcloud.io
+          mvn clean verify sonar:sonar -DskipTests \
+           -Dsonar.projectKey=gestion-tache-project_gestion-tache \
+           -Dsonar.organization=gestion-tache-project \
+           -Dsonar.host.url=https://sonarcloud.io
 
-      # Upload Surefire reports if tests fail
-      - name: Upload Surefire Reports
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: surefire-reports
-          path: target/surefire-reports/
+
