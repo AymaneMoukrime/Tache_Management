@@ -28,7 +28,8 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
-
+    
+//methode to create an account for the first time
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest){
         if (authService.hasUserWithEmail(signupRequest.getEmail()))
