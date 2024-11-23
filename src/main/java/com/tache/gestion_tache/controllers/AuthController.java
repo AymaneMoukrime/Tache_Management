@@ -28,7 +28,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
-    
+
 //methode to create an account for the first time
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest){
@@ -39,7 +39,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
-
+//methode to connect if you have an account already
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest authenticationRequest) {
         try {
