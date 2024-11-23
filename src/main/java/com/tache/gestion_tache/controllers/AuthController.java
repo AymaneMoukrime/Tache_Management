@@ -2,6 +2,7 @@ package com.tache.gestion_tache.controllers;
 
 import com.tache.gestion_tache.dto.AuthenticationRequest;
 import com.tache.gestion_tache.dto.SignupRequest;
+import com.tache.gestion_tache.dto.UserResponse;
 import com.tache.gestion_tache.entities.User;
 import com.tache.gestion_tache.repositories.UserRepository;
 import com.tache.gestion_tache.dto.AuthenticationResponse;
@@ -37,7 +38,14 @@ public class AuthController {
         User createdUser = authService.signUp(signupRequest.getEmail(),signupRequest.getName(),signupRequest.getPassword());
         if (createdUser == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        UserResponse userResponse=new UserResponse(
+                createdUser.getId(),
+                createdUser.getName(),
+                createdUser.getEmail(),
+                createdUser.getDateInscription(),
+                createdUser.getUserRole().name()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 //methode to connect if you have an account already
     @PostMapping("/login")
