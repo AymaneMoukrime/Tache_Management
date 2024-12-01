@@ -35,12 +35,13 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain securityFilterChain (HttpSecurity http)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**").
-                        permitAll().requestMatchers("/api/admin/**").hasAnyAuthority (UserRole.Admin.name())
-                        .requestMatchers("/api/normal/**").hasAnyAuthority (UserRole.normal.name())
+                        permitAll().requestMatchers("/api/admin/**","/api/user/users").hasAnyAuthority (UserRole.ADMIN.toString())
+                        .requestMatchers("/api/normal/**","/api/task/**").hasAnyAuthority (UserRole.NORMAL.toString())
                         .anyRequest().authenticated()).sessionManagement(manager -> manager.sessionCreationPolicy (STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

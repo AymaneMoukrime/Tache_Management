@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -33,11 +34,14 @@ public class AuthController {
 //methode to create an account for the first time
     @PostMapping("/signup")
     public ResponseEntity<?> signupUser(@RequestBody SignupRequest signupRequest){
+        if(signupRequest.getEmail()=="" || signupRequest.getName() ==""|| signupRequest.getPassword()==""){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("all the fields must be filled");
+        }
         if (authService.hasUserWithEmail(signupRequest.getEmail()))
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("User already exists");
         User createdUser = authService.signUp(signupRequest.getEmail(),signupRequest.getName(),signupRequest.getPassword());
-        if (createdUser == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");
+        if (createdUser == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User could not be created");}
         UserResponse userResponse=new UserResponse(
                 createdUser.getId(),
                 createdUser.getName(),

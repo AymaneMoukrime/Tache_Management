@@ -18,14 +18,14 @@ public class AuthServiceImpl implements AuthService {
 
     @PostConstruct
     public void createAdminAcount(){
-        Optional<User> user = userRepository.findByUserRole(UserRole.Admin);
+        Optional<User> user = userRepository.findByUserRole(UserRole.ADMIN);
         if(user.isEmpty()){
             User newUser = new User();
             newUser.setEmail("admin@example.com");
             newUser.setName("admin");
             newUser.setDateInscription(new Date());
             newUser.setPassword(new BCryptPasswordEncoder().encode("admin"));
-            newUser.setUserRole(UserRole.Admin);
+            newUser.setUserRole(UserRole.ADMIN);
             userRepository.save(newUser);
             //LOG
             System.out.println("Admin created");
@@ -41,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
         user.setName(name);
         user.setPassword(new BCryptPasswordEncoder().encode(password));
         user.setDateInscription(new Date());
-        user.setUserRole(UserRole.normal);
+        user.setUserRole(UserRole.NORMAL);
         return userRepository.save(user);
     }
     @Override
