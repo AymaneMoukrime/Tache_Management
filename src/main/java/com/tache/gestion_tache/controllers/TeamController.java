@@ -61,7 +61,8 @@ public class TeamController {
         return ResponseEntity.ok(teamDTO);
 
     }
-    @PostMapping("/teams")
+
+    @GetMapping("/teams")
     public ResponseEntity<?> findteamsByUser(@AuthenticationPrincipal UserDetails userDetails) {
         Optional<User> user=userRepository.findByEmail(userDetails.getUsername());
         List<TeamDto> teams=teamService.findByUser(user.get());
