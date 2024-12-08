@@ -1,5 +1,6 @@
 package com.tache.gestion_tache.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +23,7 @@ public class Team {
     private String name;
 
     @Temporal(TemporalType.DATE)
-    private Date dateCreation;
+    private Date dateCreation=new Date();
 
     @ManyToMany
     @JoinTable(
@@ -30,10 +31,12 @@ public class Team {
             joinColumns = @JoinColumn(name = "team_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
 
 
     @ManyToMany(mappedBy = "teams")
+    @JsonIgnore
     private List<Project> projects = new ArrayList<>();
 
 

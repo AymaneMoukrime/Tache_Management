@@ -2,9 +2,11 @@ package com.tache.gestion_tache.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.util.Date;
 
@@ -29,13 +31,16 @@ public class Task {
 
     @Temporal(TemporalType.DATE)
     private Date dateDeadline;
-
-    private Long priorite;
+    private Long priorite=1L;
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
     @Column(nullable = true)
     private String couleur;
+    @ManyToOne
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private User owner;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -44,6 +49,7 @@ public class Task {
 
    @ManyToOne
     @JoinColumn(name = "project_id")
+   @JsonIgnore
     private Project project;
 
 

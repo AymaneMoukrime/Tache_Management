@@ -3,16 +3,16 @@ package com.tache.gestion_tache.services;
 
 import com.tache.gestion_tache.dto.UserResponse;
 import com.tache.gestion_tache.entities.User;
-import com.tache.gestion_tache.entities.UserRole;
+
 import com.tache.gestion_tache.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
+
 
 import java.util.List;
 import java.util.stream.Collectors;

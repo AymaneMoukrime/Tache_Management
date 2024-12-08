@@ -43,7 +43,6 @@ public class Project {
     private List<Team> teams = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    @JsonIgnore
     private User owner;
 
     @ManyToMany
