@@ -27,8 +27,6 @@
         <url/>
     </scm>
     <properties>
-        <java.version>17</java.version>
-        <sonar.projectKey>gestion-tache-project_gestion-tache</sonar.projectKey>
         <sonar.organization>gestion-tache-project</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
@@ -91,6 +89,12 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>0.11.5</version>
+        </dependency>
+
+        <!-- for mail-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
 

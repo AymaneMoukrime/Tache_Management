@@ -1,5 +1,6 @@
 package com.tache.gestion_tache.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,24 +25,33 @@ public class Task {
     private String description;
 
     @Temporal(TemporalType.DATE)
-    private Date dateCreation;
+    private Date dateCreation=new Date();
 
     @Temporal(TemporalType.DATE)
     private Date dateDeadline;
 
     private Long priorite;
-
-    @Column(nullable = true)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @Column(nullable = true)
     private String couleur;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "team_id")
-    private Team team;
+   @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+
+    public void assignUser(User user) {
+        this.user = user;
+        if (!user.getTasks().contains(this)) {
+            user.getTasks().add(this);
+        }
+    }
+    
 }

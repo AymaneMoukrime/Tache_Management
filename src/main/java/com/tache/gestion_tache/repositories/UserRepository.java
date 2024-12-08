@@ -16,8 +16,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //only for admin
     Optional<User> findByUserRole(UserRole userRole);
 
+    List<User> findAllByNameStartingWith(String prefix);
+
     @Query("SELECT u.email FROM User u")
     List<String> getEmails();
 
+    @Query("SELECT u.email FROM User u WHERE u.userRole='NORMAL'")
+    List<String> getEmailsUser();
 
 }

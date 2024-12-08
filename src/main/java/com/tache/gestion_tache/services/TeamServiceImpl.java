@@ -12,20 +12,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TeamServiceImpl {
+public class TeamServiceImpl implements TeamService {
     @Autowired
     private TeamRepository teamRepository;
 
     public List<Team> findAll() {
         return teamRepository.findAll();
     }
-
+@Override
     public TeamDto findByName(String name, Long userId) {
         return teamRepository.findByNameAndUserId(name, userId)
                 .map(this::mapToTeamDto)
                 .orElse(null); // or throw an exception like new NotFoundException("Team not found")
     }
-
+@Override
     public List<TeamDto> findByUser(User user) {
         List<Team> teams = teamRepository.findByUsers(user);
         return teams.stream()

@@ -32,4 +32,9 @@ public class Team {
     )
     private List<User> users = new ArrayList<>();
 
+
+    @ManyToMany(mappedBy = "teams")
+    private List<Project> projects = new ArrayList<>();
+
+
 }

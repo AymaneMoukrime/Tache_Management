@@ -35,8 +35,8 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain securityFilterChain (HttpSecurity http)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**").
-                        permitAll().requestMatchers("/api/admin/**","/api/user/users").hasAnyAuthority (UserRole.ADMIN.toString())
-                        .requestMatchers("/api/normal/**","/api/task/**").hasAnyAuthority (UserRole.NORMAL.toString())
+                        permitAll().requestMatchers("/api/admin/**","/api/user/**").hasAnyAuthority (UserRole.ADMIN.toString())
+                        .requestMatchers("/api/normal/**","/api/task/**","/api/task/**","/api/projet/**").hasAnyAuthority (UserRole.NORMAL.toString())
                         .anyRequest().authenticated()).sessionManagement(manager -> manager.sessionCreationPolicy (STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

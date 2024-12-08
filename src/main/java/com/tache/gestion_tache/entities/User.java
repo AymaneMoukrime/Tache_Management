@@ -46,6 +46,14 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<Team> teams = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "users")
+    private List<Project> projects = new ArrayList<>();
+
+
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(() -> "ROLE_" + this.userRole.name());
@@ -75,6 +83,17 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public void addTask(Task task) {
+        tasks.add(task);
+        task.setUser(this);
+    }
+
+    public void removeTask(Task task) {
+        tasks.remove(task);
+        task.setUser(null);
+    }
+
 
     public void addTeam(Team team) {
         this.teams.add(team);

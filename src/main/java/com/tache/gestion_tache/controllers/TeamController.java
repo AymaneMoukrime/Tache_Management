@@ -2,13 +2,11 @@ package com.tache.gestion_tache.controllers;
 
 import com.tache.gestion_tache.dto.TeamDto;
 import com.tache.gestion_tache.dto.UserResponse;
-import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.Team;
 import com.tache.gestion_tache.entities.User;
-import com.tache.gestion_tache.repositories.TaskRepository;
 import com.tache.gestion_tache.repositories.TeamRepository;
 import com.tache.gestion_tache.repositories.UserRepository;
-import com.tache.gestion_tache.services.TeamServiceImpl;
+import com.tache.gestion_tache.services.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +26,9 @@ public class TeamController {
     private TeamRepository teamRepository;
 
     @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
     private UserRepository userRepository;
     @Autowired
-    private TeamServiceImpl teamService;
+    private TeamService teamService;
 
 
     @PostMapping("/create_team")
@@ -52,8 +47,8 @@ public class TeamController {
 
     @PostMapping("/teamname/{teamname}")
     public ResponseEntity<?> findteambyname(@AuthenticationPrincipal UserDetails userDetails, @PathVariable String teamname) {
-        Optional<User> user=userRepository.findByEmail(userDetails.getUsername());
-        TeamDto teamDTO = teamService.findByName(teamname,user.get().getId());
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        TeamDto teamDTO = teamService.findByName(teamname,user.getId());
         if(teamDTO==null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("no team by that name");
         }
@@ -64,12 +59,12 @@ public class TeamController {
 
     @GetMapping("/teams")
     public ResponseEntity<?> findteamsByUser(@AuthenticationPrincipal UserDetails userDetails) {
-        Optional<User> user=userRepository.findByEmail(userDetails.getUsername());
-        List<TeamDto> teams=teamService.findByUser(user.get());
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));;
+        List<TeamDto> teams=teamService.findByUser(user);
         if(teams.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you do not have any teams");
         }
-        return ResponseEntity.ok(teamService.findByUser(user.get()));
+        return ResponseEntity.ok(teamService.findByUser(user));
     }
 
     private TeamDto convertToDTO(Team team) {
