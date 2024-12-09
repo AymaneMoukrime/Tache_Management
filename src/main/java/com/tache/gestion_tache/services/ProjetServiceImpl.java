@@ -1,6 +1,5 @@
 package com.tache.gestion_tache.services;
 
-import com.tache.gestion_tache.dto.UserResponse;
 import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.Team;
@@ -11,10 +10,7 @@ import com.tache.gestion_tache.repositories.TeamRepository;
 import com.tache.gestion_tache.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -54,15 +50,17 @@ public class ProjetServiceImpl implements ProjectService {
         Project existingProject = projectRepository.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project not found"));
 
-        if(updatedProject.getEndDate().before(new Date())){
+        if(updatedProject.getEndDate()!=null && updatedProject.getEndDate().before(new Date())){
             throw new RuntimeException("End date cannot be before start date");
         }
 
         if (!existingProject.getOwner().equals(user)) {
             throw new RuntimeException("You do not have permission ");
         }
-        existingProject.setName(updatedProject.getName());
-        existingProject.setDescription(updatedProject.getDescription());
+        if(updatedProject.getName() != null && !updatedProject.getName().isEmpty()){
+        existingProject.setName(updatedProject.getName());}
+        if(updatedProject.getDescription() != null && !updatedProject.getDescription().isEmpty()){
+        existingProject.setDescription(updatedProject.getDescription());}
         existingProject.setEndDate(updatedProject.getEndDate());
 
         return projectRepository.save(existingProject);
