@@ -20,8 +20,8 @@ public class TeamServiceImpl implements TeamService {
         return teamRepository.findAll();
     }
 @Override
-    public TeamDto findByName(String name, Long userId) {
-        return teamRepository.findByNameAndUserId(name, userId)
+    public TeamDto findByName(String name, Long userId,Long projectid) {
+        return teamRepository.findByNameAndUserIdAndProjectId(name, userId,projectid)
                 .map(this::mapToTeamDto)
                 .orElse(null); // or throw an exception like new NotFoundException("Team not found")
     }

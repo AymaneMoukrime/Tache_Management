@@ -19,7 +19,7 @@ public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    @Column(nullable = false)
     private String name;
 
     @Temporal(TemporalType.DATE)
@@ -35,9 +35,8 @@ public class Team {
     private List<User> users = new ArrayList<>();
 
 
-    @ManyToMany(mappedBy = "teams")
-    @JsonIgnore
-    private List<Project> projects = new ArrayList<>();
-
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
 }

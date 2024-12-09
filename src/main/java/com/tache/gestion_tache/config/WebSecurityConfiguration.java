@@ -36,7 +36,7 @@ public class WebSecurityConfiguration {
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**").
                         permitAll().requestMatchers("/api/admin/**","/api/user/**").hasAnyAuthority (UserRole.ADMIN.toString())
-                        .requestMatchers("/api/normal/**","/api/task/**","/api/projet/**").hasAnyAuthority (UserRole.NORMAL.toString())
+                        .requestMatchers("/api/normal/**","/api/task/**","/api/projet/**","/api/team/**").hasAnyAuthority (UserRole.NORMAL.toString())
                         .anyRequest().authenticated()).sessionManagement(manager -> manager.sessionCreationPolicy (STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

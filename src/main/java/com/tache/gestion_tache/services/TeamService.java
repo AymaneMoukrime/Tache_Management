@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface TeamService {
 
-    TeamDto findByName(String name, Long userId);
+    TeamDto findByName(String name, Long userId,Long projectid);
     List<TeamDto> findByUser(User user);
 
 }
