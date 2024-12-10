@@ -6,6 +6,7 @@ import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.User;
 import com.tache.gestion_tache.services.ProjectService;
 import com.tache.gestion_tache.services.TaskService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +33,16 @@ public class TaskController {
     public ResponseEntity<?> createTask(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid ,@RequestBody Task task) {
 
         return taskService.saveTask(projectid,userDetails,task);
+    }
+
+    @PostMapping("/createTaskWithAssing/{projectid}")
+    public  ResponseEntity<?> createTaskWithAssign(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long projectid, @RequestBody Task task, @RequestParam String Email) {
+        return taskService.saveTaskWithAssign(projectid,userDetails,task,Email);
+    }
+
+    @PostMapping("/AssignTask/{taskid}")
+    public ResponseEntity<?> assignTask(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long  taskid,@RequestParam String  email) {
+        return taskService.assignTask(taskid,userDetails,email);
     }
 
     @DeleteMapping("/deletetask/{id}")

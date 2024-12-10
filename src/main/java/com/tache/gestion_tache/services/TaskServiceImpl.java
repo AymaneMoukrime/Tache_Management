@@ -80,6 +80,82 @@ public class TaskServiceImpl implements TaskService {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to perform this action");
     }
 
+    //create a task and assign it to someone
+    @Override
+    public ResponseEntity<?> saveTaskWithAssign(Long projectId, UserDetails userDetails, Task task, String email) {
+        // Find the user making the request
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+
+        // Validate project
+        Project project = projectService.getProject(projectId);
+        if (project == null) {
+            return ResponseEntity.badRequest().body("Project not found");
+        }
+
+        // Check authorization
+        if (!project.getOwner().equals(user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to perform this action");
+        }
+
+        // Validate assigned user if email is provided
+        User assignedUser = null;
+        if (email != null && !email.isBlank()) {
+            assignedUser = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Assigned user not found"));
+        }
+
+        // Check for duplicate task
+        if (project.getTasks().contains(task)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Task already exists");
+        }
+
+        // Validate deadline
+        if (task.getDateDeadline() != null && task.getDateDeadline().before(new Date())) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Deadline is before the current date");
+        }
+
+        // Set task details
+        task.setProject(project);
+        task.setUser(assignedUser != null ? assignedUser : user); // Default to creator if no assigned user
+        task.setOwner(user);
+        task.setStatus(TaskStatus.TODO);
+
+        // Save task
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskRepository.save(task));
+    }
+
+    //assign an already created task
+    @Override
+    public ResponseEntity<?> assignTask(Long taskId, UserDetails userDetails, String email) {
+        // Find the user making the request
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+
+        // Find the task to assign
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with ID: " + taskId));
+
+        // Check if the user is authorized (task owner or project owner)
+        Project project = task.getProject();
+        if (!task.getOwner().equals(user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only the task owner can assign this task");
+        }
+
+        // Find the assigned user
+        User assignedUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Assigned user not found with email: " + email));
+
+        // Assign the task
+        task.setUser(assignedUser);
+
+        // Save the updated task
+        taskRepository.save(task);
+
+        return ResponseEntity.ok("Task successfully assigned to user: " + email);
+    }
+
+
     //Delete Task Only By the owner
     @Override
     public ResponseEntity<?> deleteTask(UserDetails userDetails,Long id) {

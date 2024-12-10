@@ -15,4 +15,6 @@ public interface TaskService {
     ResponseEntity<?> deleteTask(UserDetails userDetails,Long id);
     ResponseEntity<?> updateTask(Long taskId, Task updatedTask,UserDetails userDetails);
     ResponseEntity<?> SetProgress(Long taskId, String taskStatus,UserDetails userDetails);
+    ResponseEntity<?> saveTaskWithAssign(Long projectid,UserDetails userDetails, Task task,String email);
+    ResponseEntity<?> assignTask(Long taskId, UserDetails userDetails, String email);
 }
