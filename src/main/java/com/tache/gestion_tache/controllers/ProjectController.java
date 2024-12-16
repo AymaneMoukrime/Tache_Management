@@ -1,6 +1,7 @@
 package com.tache.gestion_tache.controllers;
 
 
+import com.tache.gestion_tache.dto.ProjectResponse;
 import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.repositories.ProjectRepository;
 import com.tache.gestion_tache.services.ProjectService;
@@ -19,11 +20,11 @@ public class ProjectController {
     private final ProjectService projectService;
 
     @PostMapping("/addProject")
-    public Project createProject(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Project project) {
+    public ProjectResponse createProject(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Project project) {
         return projectService.addproject(userDetails, project);
     }
     @PutMapping("/updateProject/{projectid}")
-    public Project updateProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long projectid, @RequestBody Project updatedProject) {
+    public ProjectResponse updateProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long projectid, @RequestBody Project updatedProject) {
         return projectService.updateProject(userDetails, projectid, updatedProject);
     }
 
@@ -41,7 +42,7 @@ public class ProjectController {
         return projectService.addTaskToProject(userDetails, projectId, taskId);
     }
     @GetMapping("/getAllProjectsForUser")
-    public List<Project> getAllProjectsForUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public List<ProjectResponse> getAllProjectsForUser(@AuthenticationPrincipal UserDetails userDetails) {
         return projectService.getAllProjectsForUser(userDetails);
     }
 

@@ -10,4 +10,6 @@ public interface TeamService {
     TeamDto findByName(String name, Long userId,Long projectid);
     List<TeamDto> findByUser(User user);
 
+    List<TeamDto> findAlladmin();
+    TeamDto findById(Long teamId);
 }

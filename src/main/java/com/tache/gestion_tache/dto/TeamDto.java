@@ -22,4 +22,9 @@ public class TeamDto {
                 this.name = name;
                 this.dateCreation = dateCreation;
         }
+
+        public TeamDto(Long id, String name) {
+                this.id = id;
+                this.name = name;
+        }
 }

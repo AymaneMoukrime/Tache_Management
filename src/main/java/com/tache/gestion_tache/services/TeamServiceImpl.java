@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,38 @@ public class TeamServiceImpl implements TeamService {
         return teams.stream()
                 .map(this::mapToTeamDto)
                 .collect(Collectors.toList());
+    }
+
+@Override
+    public List<TeamDto> findAlladmin() {
+        List<Team> teams = teamRepository.findAll();
+        return teams.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+@Override
+    public TeamDto findById(Long teamId) {
+        Optional<Team> team = teamRepository.findById(teamId);
+        return team.map(this::convertToDTO).orElse(null); // Return null if team not found
+    }
+    // Convert Team to TeamDto
+    private TeamDto convertToDTO(Team team) {
+        TeamDto teamDTO = new TeamDto();
+        teamDTO.setId(team.getId());
+        teamDTO.setName(team.getName());
+        teamDTO.setDateCreation(team.getDateCreation());
+        teamDTO.setUsers(
+                team.getUsers().stream().map(user -> {
+                    UserResponse userDTO = new UserResponse();
+                    userDTO.setId(user.getId());
+                    userDTO.setName(user.getName());
+                    userDTO.setEmail(user.getEmail());
+                    userDTO.setDateInscription(user.getDateInscription());
+                    userDTO.setUserRole(user.getUserRole().toString());
+                    return userDTO;
+                }).collect(Collectors.toList())
+        );
+        return teamDTO;
     }
 
 

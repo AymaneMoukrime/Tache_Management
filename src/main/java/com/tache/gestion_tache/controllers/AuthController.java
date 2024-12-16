@@ -72,7 +72,7 @@ public ResponseEntity<?> login(@RequestBody AuthenticationRequest authentication
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Generate JWT token
-        String jwtToken = jwtUtil.generateToken(userDetails);
+        String jwtToken = jwtUtil.generateToken(userDetails,user.getId());
 
         // Build the authentication response
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
