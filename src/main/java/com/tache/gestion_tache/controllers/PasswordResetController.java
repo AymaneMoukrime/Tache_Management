@@ -19,15 +19,15 @@ public class PasswordResetController {
     private UserRepository userRepository;
 
     @PostMapping("/reset-password-request")
-    public ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
-        passwordResetService.sendResetCode(email);
+    public ResponseEntity<?> requestPasswordReset(@RequestParam String Email) {
+        passwordResetService.sendResetCode(Email);
         return ResponseEntity.ok("Password reset code sent to your email.");
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String code, @RequestParam String newPassword) {
-        if (passwordResetService.validateResetCode(email, code)) {
-            User user = userRepository.findByEmail(email)
+    public ResponseEntity<?> resetPassword(@RequestParam String Email, @RequestParam String code, @RequestParam String newPassword) {
+        if (passwordResetService.validateResetCode(Email, code)) {
+            User user = userRepository.findByEmail(Email)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             // Hash the new password before saving

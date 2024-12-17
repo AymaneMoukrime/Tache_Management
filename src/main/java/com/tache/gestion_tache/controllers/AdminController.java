@@ -90,10 +90,10 @@ public class AdminController {
     public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long projectId, @RequestBody Project projectDetails) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
-
-        project.setName(projectDetails.getName());
-        project.setDescription(projectDetails.getDescription());
-        project.setOwner(projectDetails.getOwner()); // Update owner if needed
+if(projectDetails.getName()!=null && !projectDetails.getName().isEmpty()){
+        project.setName(projectDetails.getName());}
+        if(projectDetails.getDescription()!=null && !projectDetails.getDescription().isEmpty()){
+        project.setDescription(projectDetails.getDescription());}
         Project updatedProject = projectRepository.save(project);
 
         return ResponseEntity.ok(convertToProjectDto(updatedProject));
