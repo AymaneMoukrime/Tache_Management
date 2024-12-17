@@ -77,14 +77,14 @@ public class TeamController {
         return ResponseEntity.ok(teamDTO);
     }
     @PostMapping("/asignUsertoTeam/{projectid}/{teamid}")
-    public  ResponseEntity<?> assignUserToTeam(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long teamid,@RequestParam String email) {
+    public  ResponseEntity<?> assignUserToTeam(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long teamid,@RequestParam String Email) {
         Project project=projectRepository.findById(projectid).orElseThrow(() -> new RuntimeException("Project not found"));
         User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
         Team team=teamRepository.findById(teamid).orElseThrow(() -> new RuntimeException("Team not found"));
         if(!project.getOwner().equals(user)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have permission to assign this team");
         }
-        User adduser=userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        User adduser=userRepository.findByEmail(Email).orElseThrow(() -> new RuntimeException("User not found"));
         if(team.getUsers().contains(adduser)){
             return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is already assigned to this team");
         }
@@ -98,7 +98,7 @@ public class TeamController {
     public ResponseEntity<?> removeUserFromTeam(@AuthenticationPrincipal UserDetails userDetails,
                                                 @PathVariable Long projectid,
                                                 @PathVariable Long teamid,
-                                                @RequestParam String email) {
+                                                @RequestParam String Email) {
         // Find the project by ID
         Project project = projectRepository.findById(projectid)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
@@ -117,7 +117,7 @@ public class TeamController {
                 .orElseThrow(() -> new RuntimeException("Team not found"));
 
         // Find the user to be removed by email
-        User removeUser = userRepository.findByEmail(email)
+        User removeUser = userRepository.findByEmail(Email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check if the user is part of the team

@@ -1,5 +1,6 @@
 package com.tache.gestion_tache.services;
 
+import com.tache.gestion_tache.dto.TaskDto;
 import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.TaskStatus;
@@ -12,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -32,12 +35,20 @@ public class TaskServiceImpl implements TaskService {
             return ResponseEntity.badRequest().body("Project not found");
         }
         if(user.getProjects().contains(project) || project.getOwner().equals(user)){
-            return ResponseEntity.ok(taskRepository.findById(id));
+            Task task = taskRepository.findById(id).orElse(null); // Return null if not found
+
+            if (task == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Task not found with id: " + id);
+            }
+            TaskDto taskDto=new TaskDto(task.getId(),task.getTitre(),task.getDescription(),task.getDateCreation(),task.getDateDeadline()
+            ,task.getPriorite(),task.getStatus(),task.getCouleur(),task.getOwner().getEmail(),task.getUser().getEmail());
+            return ResponseEntity.ok(taskDto);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
    }
-   @Override
-    public List<Task> findAllTasks(Long projectId, UserDetails userDetails) {
+    @Override
+    public List<TaskDto> findAllTasks(Long projectId, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
 
@@ -46,12 +57,29 @@ public class TaskServiceImpl implements TaskService {
             throw new RuntimeException("Project not found with id: " + projectId);
         }
 
-        if (!user.getProjects().contains(project) ) {
+        if (!user.getProjects().contains(project)) {
             throw new RuntimeException("Unauthorized access to project tasks");
         }
 
-        return taskRepository.findByProject(project);
+        // Fetch all tasks for the project
+        List<Task> tasks = taskRepository.findByProject(project);
+
+        // Map the list of tasks to a list of TaskDto objects
+
+        return tasks.stream().map(task -> new TaskDto(
+                task.getId(),
+                task.getTitre(),
+                task.getDescription(),
+                task.getDateCreation(),
+                task.getDateDeadline(),
+                task.getPriorite(),
+                task.getStatus(),
+                task.getCouleur(),
+                task.getOwner().getEmail(),
+                task.getUser().getEmail()
+        )).collect(Collectors.toList());
     }
+
    //Create A Task but only By the Owner of the Project
     @Override
     public ResponseEntity<?> saveTask(Long projectid,UserDetails userDetails, Task task) {
@@ -180,18 +208,30 @@ public class TaskServiceImpl implements TaskService {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
 
-        if (existingTask.getOwner().equals(user)) {
-            existingTask.setTitre(updatedTask.getTitre());
-            existingTask.setDescription(updatedTask.getDescription());
-            existingTask.setStatus(updatedTask.getStatus());
-            return ResponseEntity.status(HttpStatus.OK).body(taskRepository.save(existingTask));
-
+        if (!existingTask.getOwner().equals(user)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authorized to update this task");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to perform this action");
-        // Update fields
+
+        if (updatedTask.getStatus() != null) {
+                existingTask.setStatus(updatedTask.getStatus());  // Set new status if valid
+        }
+
+        if (updatedTask.getDateDeadline() != null && updatedTask.getDateDeadline().before(new Date())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline cannot be in the past");
+        }
+        existingTask.setTitre(updatedTask.getTitre());
+        existingTask.setDescription(updatedTask.getDescription());
+        if(updatedTask.getCouleur()!=null && !updatedTask.getCouleur().isEmpty()){
+        existingTask.setCouleur(updatedTask.getCouleur());}
+        existingTask.setDateDeadline(updatedTask.getDateDeadline());
+
+        // Save the updated task and return the response
+        return ResponseEntity.status(HttpStatus.OK).body(taskRepository.save(existingTask));
 
 
     }
+
+
 
     @Override
     public ResponseEntity<?> SetProgress(Long taskId, String taskStatus,UserDetails userDetails) {

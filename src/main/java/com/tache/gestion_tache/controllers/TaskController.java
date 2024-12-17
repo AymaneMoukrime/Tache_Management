@@ -1,6 +1,7 @@
 package com.tache.gestion_tache.controllers;
 
 
+import com.tache.gestion_tache.dto.TaskDto;
 import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.User;
@@ -8,6 +9,7 @@ import com.tache.gestion_tache.services.ProjectService;
 import com.tache.gestion_tache.services.TaskService;
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/api/task")
 public class TaskController {
-
+    @Autowired
     private final TaskService taskService;
     private final ProjectService projectService;
 
@@ -41,8 +43,8 @@ public class TaskController {
     }
 
     @PostMapping("/AssignTask/{taskid}")
-    public ResponseEntity<?> assignTask(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long  taskid,@RequestParam String  email) {
-        return taskService.assignTask(taskid,userDetails,email);
+    public ResponseEntity<?> assignTask(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long  taskid,@RequestParam String  Email) {
+        return taskService.assignTask(taskid,userDetails,Email);
     }
 
     @DeleteMapping("/deletetask/{id}")
@@ -54,13 +56,13 @@ public class TaskController {
        return taskService.updateTask(id,task,userDetails);
     }
 
-    @PostMapping("/setstatus/{id}/{status}")
+    @PutMapping("/setstatus/{id}/{status}")
     public ResponseEntity<?> setStatus(@PathVariable Long id, @PathVariable String status,@AuthenticationPrincipal UserDetails userDetails) {
         return taskService.SetProgress(id,status,userDetails);
     }
 
     @GetMapping("/taskinfo/{projectid}")
-    public List<Task> getTask(@PathVariable Long projectid, @AuthenticationPrincipal UserDetails userDetails){
+    public List<TaskDto> getTask(@PathVariable Long projectid, @AuthenticationPrincipal UserDetails userDetails){
         return  taskService.findAllTasks(projectid,userDetails);
 
     }

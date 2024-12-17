@@ -38,7 +38,7 @@ public class Task {
     @Column(nullable = true)
     private String couleur;
     @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "owner_id", nullable = false)
     @JsonIgnore
     private User owner;
 
