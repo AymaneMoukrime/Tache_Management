@@ -7,7 +7,9 @@ import com.tache.gestion_tache.entities.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -21,4 +23,5 @@ public interface UserService {
     UserResponse updateUser(UserDetails userDetails, String email, String name);
     List<ProjectResponse> getUserProjects(UserDetails userDetails);
     List<TeamDto> getUserTeams(UserDetails userDetails);
+    void updateUserImage(UserDetails userDetails, MultipartFile file) throws IOException;
 }

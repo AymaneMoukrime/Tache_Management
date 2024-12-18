@@ -17,10 +17,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -69,7 +70,20 @@ public class UserServiceImpl implements UserService {
                 .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
     }
+    @Override
+    public void updateUserImage(UserDetails userDetails, MultipartFile file) throws IOException {
+        // Fetch the current authenticated user from the database using email from userDetails
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // If the file is not empty, save the image
+        if (file != null && !file.isEmpty()) {
+            user.setImage(file.getBytes());  // Save image as byte array in the user entity
+        }
+
+        // Save the updated user back to the database
+        userRepository.save(user);
+    }
     @Override
     public ResponseEntity<?> findByEmail(String email){
         Optional<User> user =userRepository.findByEmail(email);
@@ -156,7 +170,8 @@ public class UserServiceImpl implements UserService {
         return new ProjectResponse(
                 project.getId(),
                 project.getName(),
-                project.getDescription()
+                project.getDescription(),
+                project.getStartDate()
         );
     }
 

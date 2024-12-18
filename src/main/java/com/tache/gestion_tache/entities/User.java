@@ -52,6 +52,10 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "users")
     private List<Project> projects = new ArrayList<>();
 
+    @Lob
+    @Column(name = "image", columnDefinition = "LONGBLOB", nullable = true)
+    private byte[] image;
+
     private String passwordResetCode; // Encrypted code
     private Date passwordResetCodeExpiry; // Expiry date for the code
 

@@ -201,7 +201,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ResponseEntity<?> updateTask(Long taskId, Task updatedTask,UserDetails userDetails) {
+    public ResponseEntity<?> updateTask(Long taskId, Task updatedTask, UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
 
@@ -212,24 +212,40 @@ public class TaskServiceImpl implements TaskService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User is not authorized to update this task");
         }
 
+        // Update the status if it's provided
         if (updatedTask.getStatus() != null) {
-                existingTask.setStatus(updatedTask.getStatus());  // Set new status if valid
+            existingTask.setStatus(updatedTask.getStatus());
         }
 
+        // Check if the deadline is in the past and return a bad request if so
         if (updatedTask.getDateDeadline() != null && updatedTask.getDateDeadline().before(new Date())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Deadline cannot be in the past");
         }
-        existingTask.setTitre(updatedTask.getTitre());
-        existingTask.setDescription(updatedTask.getDescription());
-        if(updatedTask.getCouleur()!=null && !updatedTask.getCouleur().isEmpty()){
-        existingTask.setCouleur(updatedTask.getCouleur());}
-        existingTask.setDateDeadline(updatedTask.getDateDeadline());
+
+        // Only update the title if it's provided
+        if (updatedTask.getTitre() != null) {
+            existingTask.setTitre(updatedTask.getTitre());
+        }
+
+        // Only update the description if it's provided
+        if (updatedTask.getDescription() != null) {
+            existingTask.setDescription(updatedTask.getDescription());
+        }
+
+        // Only update the color if it's provided and not empty
+        if (updatedTask.getCouleur() != null && !updatedTask.getCouleur().isEmpty()) {
+            existingTask.setCouleur(updatedTask.getCouleur());
+        }
+
+        // Only update the deadline if it's provided
+        if (updatedTask.getDateDeadline() != null && !updatedTask.getDateDeadline().before(new Date())) {
+            existingTask.setDateDeadline(updatedTask.getDateDeadline());
+        }
 
         // Save the updated task and return the response
         return ResponseEntity.status(HttpStatus.OK).body(taskRepository.save(existingTask));
-
-
     }
+
 
 
 

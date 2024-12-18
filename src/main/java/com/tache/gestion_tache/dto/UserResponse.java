@@ -17,4 +17,8 @@ public class UserResponse {
     private Date dateInscription;
     private String userRole;
 
+    public UserResponse(String johnDoe, String mail) {
+        this.name = johnDoe;
+        this.email = mail;
+    }
 }
