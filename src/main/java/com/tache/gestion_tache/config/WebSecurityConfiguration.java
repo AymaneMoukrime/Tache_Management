@@ -40,16 +40,17 @@ public class WebSecurityConfiguration {
     public SecurityFilterChain securityFilterChain (HttpSecurity http)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource())) // Integrate CORS
-                .authorizeHttpRequests(request -> request.requestMatchers("/api/auth/").
-                        permitAll().requestMatchers("/api/admin/").hasAnyAuthority (UserRole.ADMIN.toString())
-                        .requestMatchers("/api/normal/","/api/task/","/api/projet/","/api/team/","/api/user/").hasAnyAuthority (UserRole.NORMAL.toString())
+                .authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**").
+                        permitAll().requestMatchers("/api/admin/**").hasAnyAuthority (UserRole.ADMIN.toString())
+                        .requestMatchers("/api/normal/**","/api/task/**","/api/projet/**","/api/team/**","/api/user/**").hasAnyAuthority (UserRole.NORMAL.toString())
                         .anyRequest().authenticated()).sessionManagement(manager -> manager.sessionCreationPolicy (STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-}
+    }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:4200")); // Frontend URL
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed methods
@@ -59,7 +60,7 @@ public class WebSecurityConfiguration {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/", configuration);
         return source;
-}
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
