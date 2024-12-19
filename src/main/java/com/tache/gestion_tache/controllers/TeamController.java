@@ -90,6 +90,8 @@ public class TeamController {
         }
         team.getUsers().add(adduser);
         teamRepository.save(team);
+        project.getUsers().add(adduser);
+        projectRepository.save(project);
         TeamDto teamDTO = convertToDTO(team);
 
         return ResponseEntity.ok(teamDTO);
@@ -165,7 +167,7 @@ public class TeamController {
 
     @GetMapping("/teams")
     public ResponseEntity<?> findteamsByUser(@AuthenticationPrincipal UserDetails userDetails) {
-        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));;
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
         List<TeamDto> teams=teamService.findByUser(user);
         if(teams.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("you do not have any teams");

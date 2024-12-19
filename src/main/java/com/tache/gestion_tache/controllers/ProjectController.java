@@ -3,7 +3,6 @@ package com.tache.gestion_tache.controllers;
 
 import com.tache.gestion_tache.dto.ProjectResponse;
 import com.tache.gestion_tache.entities.Project;
-import com.tache.gestion_tache.repositories.ProjectRepository;
 import com.tache.gestion_tache.services.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,13 +32,17 @@ public class ProjectController {
         projectService.deleteProject(userDetails, projectid);
         return ResponseEntity.ok("Project deleted ");
     }
-    @PostMapping("/addTeamToProject/{projectId}/team/{teamId}")
+   /* @PostMapping("/addTeamToProject/{projectId}/team/{teamId}")
     public Project addTeamToProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long projectId, @PathVariable Long teamId) {
         return projectService.addTeamToProject(userDetails, projectId, teamId);
     }
     @PostMapping("/addTaskToProject/{projectId}/task/{taskId}")
     public Project addTaskToProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long projectId, @PathVariable Long taskId) {
         return projectService.addTaskToProject(userDetails, projectId, taskId);
+    }*/
+    @PostMapping("/removeUserFromProject/{projectid}/user/{userid}")
+    public ResponseEntity<String> removeUserFromProject(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long userid) {
+        return projectService.removeUserFromProject(userDetails, projectid, userid);
     }
     @GetMapping("/getAllProjectsForUser")
     public List<ProjectResponse> getAllProjectsForUser(@AuthenticationPrincipal UserDetails userDetails) {

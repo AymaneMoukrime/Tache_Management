@@ -12,6 +12,7 @@ import com.tache.gestion_tache.repositories.TeamRepository;
 import com.tache.gestion_tache.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -146,6 +147,20 @@ Project ModifiedProject = projectRepository.save(existingProject);
 
         project.getTasks().add(task);
         return projectRepository.save(project);
+    }
+    @Override
+    public ResponseEntity<String> removeUserFromProject(UserDetails userDetails, Long projectId, Long userId) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if (!project.getOwner().equals(user)) {
+            throw new RuntimeException("You do not have permission ");
+        }
+        User ExistenUser=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        project.getUsers().remove(ExistenUser);
+        projectRepository.save(project);
+        return ResponseEntity.ok("Project removed");
     }
 
     @Override

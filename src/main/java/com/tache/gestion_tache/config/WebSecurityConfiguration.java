@@ -42,7 +42,7 @@ public class WebSecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource())) // Integrate CORS
                 .authorizeHttpRequests(request -> request.requestMatchers("/api/auth/**").
                         permitAll().requestMatchers("/api/admin/**").hasAnyAuthority (UserRole.ADMIN.toString())
-                        .requestMatchers("/api/normal/**","/api/task/**","/api/projet/**","/api/team/**","/api/user/**").hasAnyAuthority (UserRole.NORMAL.toString())
+                        .requestMatchers("/api/normal/**","/api/task/**","/api/project/**","/api/team/**","/api/user/**").hasAnyAuthority (UserRole.NORMAL.toString())
                         .anyRequest().authenticated()).sessionManagement(manager -> manager.sessionCreationPolicy (STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthentificationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -58,7 +58,7 @@ public class WebSecurityConfiguration {
         configuration.setAllowCredentials(true); // Allow credentials
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/", configuration);
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 

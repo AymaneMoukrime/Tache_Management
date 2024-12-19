@@ -2,6 +2,7 @@ package com.tache.gestion_tache.services;
 
 import com.tache.gestion_tache.dto.ProjectResponse;
 import com.tache.gestion_tache.entities.Project;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface ProjectService {
     List<ProjectResponse> getAllProjectsForUser(UserDetails userDetails);
     Project getProject(long id);
     List<ProjectResponse> findAll();
+    ResponseEntity<String> removeUserFromProject(UserDetails userDetails, Long projectId, Long userId);
 }

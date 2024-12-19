@@ -5,6 +5,7 @@ import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.entities.Task;
 import com.tache.gestion_tache.entities.TaskStatus;
 import com.tache.gestion_tache.entities.User;
+import com.tache.gestion_tache.repositories.ProjectRepository;
 import com.tache.gestion_tache.repositories.TaskRepository;
 import com.tache.gestion_tache.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ProjectService projectService;
+    private final ProjectRepository projectRepository;
+
     @Override
     public ResponseEntity<?> findTaskById(Long projectid,UserDetails userDetails,Long id) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -148,6 +151,8 @@ public class TaskServiceImpl implements TaskService {
         task.setUser(assignedUser != null ? assignedUser : user); // Default to creator if no assigned user
         task.setOwner(user);
         task.setStatus(TaskStatus.TODO);
+        project.getUsers().add(assignedUser);
+        projectRepository.save(project);
 
         // Save task
         return ResponseEntity.status(HttpStatus.CREATED).body(taskRepository.save(task));
@@ -176,6 +181,8 @@ public class TaskServiceImpl implements TaskService {
 
         // Assign the task
         task.setUser(assignedUser);
+        project.getUsers().add(assignedUser);
+        projectRepository.save(project);
 
         // Save the updated task
         taskRepository.save(task);
@@ -261,6 +268,7 @@ public class TaskServiceImpl implements TaskService {
         return      ResponseEntity.status(HttpStatus.OK).body(taskRepository.save(existingTask));}
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You are not authorized to perform this action");
     }
+
 
 
 }
