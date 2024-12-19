@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + userDetails.getUsername()));
 
         // Retrieve the user's projects
-        List<Project> projects = user.getProjects(); // This assumes the user entity has a 'projects' field
+        List<Project> projects = user.getProjects();
 
         // Map the projects to a response DTO (ProjectResponse)
         return projects.stream()
@@ -171,7 +171,8 @@ public class UserServiceImpl implements UserService {
                 project.getId(),
                 project.getName(),
                 project.getDescription(),
-                project.getStartDate()
+                project.getStartDate(),
+                project.getEndDate()
         );
     }
 

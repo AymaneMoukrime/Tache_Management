@@ -59,6 +59,16 @@ public class ProjetServiceImpl implements ProjectService {
         return convertToDTO(savedProject);
     }
     @Override
+    public ProjectResponse getByid(UserDetails userDetails,Long id) throws IllegalAccessException {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project=projectRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Project not found with id: " + id));
+        if(!project.getUsers().contains(user)){
+            throw new IllegalAccessException("cannot access this");
+        }
+        return convertToDTO(project);
+    }
+    @Override
     public ProjectResponse updateProject(UserDetails userDetails ,Long projectId, Project updatedProject) {
         User user = userRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
@@ -195,6 +205,8 @@ Project ModifiedProject = projectRepository.save(existingProject);
         ProjectResponse projectDTO = new ProjectResponse();
         projectDTO.setId(project.getId());
         projectDTO.setName(project.getName());
+        projectDTO.setStartDate(project.getStartDate());
+        projectDTO.setEndDate(project.getEndDate());
         projectDTO.setDescription(project.getDescription());
         UserResponse userResponse = new UserResponse();
         userResponse.setId(project.getOwner().getId());

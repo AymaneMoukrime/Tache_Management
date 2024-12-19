@@ -17,4 +17,5 @@ public interface ProjectService {
     Project getProject(long id);
     List<ProjectResponse> findAll();
     ResponseEntity<String> removeUserFromProject(UserDetails userDetails, Long projectId, Long userId);
+    ProjectResponse getByid(UserDetails userDetails,Long id) throws IllegalAccessException;
 }

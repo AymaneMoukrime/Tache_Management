@@ -17,6 +17,7 @@ public class ProjectResponse {
     private String name;
     private String description;
     private Date startDate;
+    private Date endDate;
     private UserResponse Owner;
 
     public ProjectResponse(Long id, String name, String description) {
@@ -29,7 +30,7 @@ public class ProjectResponse {
         this.name=name;
     }
 
-    public ProjectResponse(Long id, String name, String description, Date startDate) {
+    public ProjectResponse(Long id, String name, String description, Date startDate,Date endDate) {
         this.id = id;
         this.name = name;
         this.description = description;

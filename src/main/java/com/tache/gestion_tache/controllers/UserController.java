@@ -44,7 +44,6 @@ public class UserController {
     @GetMapping("UserbyEmail/{email}")
     public ResponseEntity<?> getuserByEmail(@PathVariable  String email){
         return userService.findByEmail(email);
-
     }
 
     @PostMapping("UpdateUser")

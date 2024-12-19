@@ -49,5 +49,10 @@ public class ProjectController {
         return projectService.getAllProjectsForUser(userDetails);
     }
 
+    @GetMapping("getproject/{id}")
+    public ProjectResponse getProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) throws IllegalAccessException {
+        return projectService.getByid(userDetails, id);
+    }
+
 }
 
