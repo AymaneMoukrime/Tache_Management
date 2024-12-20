@@ -49,6 +49,25 @@ public class ProjectController {
         return projectService.getAllProjectsForUser(userDetails);
     }
 
+    @PostMapping("/removeUserFromProject/{projectid}/user")
+    public ResponseEntity<String> removeUserFromProjectBymail(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@RequestParam String Email) {
+        return projectService.removeUserFromProjectBymail(userDetails, projectid, Email);
+    }
+
+    @GetMapping("/UserOfProject/{projectid}")
+    public List<String> gettAllUserOfProject(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid) {
+        return  projectService.allUsersProject(userDetails, projectid);
+    }
+
+    @PostMapping("/addUserToProjectByid/{projectid}/user/{userid}")
+    public ResponseEntity<String> addUserToProjectByid(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long userid) {
+        return projectService.addUserToProjectbyid(userDetails, projectid, userid);
+    }
+    @PostMapping("/addUserToProjectByemail/{projectid}/user")
+    public ResponseEntity<String> addUserToProjectByid(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@RequestParam String Email) {
+        return projectService.addUserToProjectbymail(userDetails, projectid, Email);
+    }
+
     @GetMapping("getproject/{id}")
     public ProjectResponse getProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) throws IllegalAccessException {
         return projectService.getByid(userDetails, id);

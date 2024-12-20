@@ -17,4 +17,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             "LEFT JOIN t.users tu " + // Joining the users of the team
             "WHERE p.owner.id = :userId OR u.id = :userId OR tu.id = :userId")
     List<Project> findAllByUserAccess(@Param("userId") Long userId);
+
+    @Query("SELECT u.email FROM Project p JOIN p.users u WHERE p.id = :projectId")
+    List<String> findAllUsersMailByProjectId(@Param("projectId") Long projectId);
 }

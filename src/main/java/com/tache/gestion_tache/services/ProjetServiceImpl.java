@@ -170,9 +170,32 @@ Project ModifiedProject = projectRepository.save(existingProject);
         User ExistenUser=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         project.getUsers().remove(ExistenUser);
         projectRepository.save(project);
-        return ResponseEntity.ok("Project removed");
+        return ResponseEntity.ok("User removed From project");
     }
 
+    @Override
+    public ResponseEntity<String> removeUserFromProjectBymail(UserDetails userDetails, Long projectId, String email) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if (!project.getOwner().equals(user)) {
+            throw new RuntimeException("You do not have permission ");
+        }
+        User ExistenUser=userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        project.getUsers().remove(ExistenUser);
+        projectRepository.save(project);
+        return ResponseEntity.ok("User removed from project");
+    }
+    @Override
+    public List<String> allUsersProject(UserDetails userDetails, Long projectId) {
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project=projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if(!project.getUsers().contains(user)){
+            throw new RuntimeException("You do not have permission ");
+        }
+        return  projectRepository.findAllUsersMailByProjectId(projectId);
+    }
     @Override
     public List<ProjectResponse> getAllProjectsForUser(UserDetails userDetails) {
         User user = userRepository.findByEmail(userDetails.getUsername())
@@ -184,6 +207,38 @@ Project ModifiedProject = projectRepository.save(existingProject);
         return projects.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ResponseEntity<String> addUserToProjectbyid(UserDetails userDetails, Long projectId, Long userId) {
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project=projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if (!project.getOwner().equals(user)) {
+            return ResponseEntity.ok("You do not have permission ");
+        }
+        User addUser=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if(addUser.getProjects().contains(project)){
+            throw new RuntimeException("User already exists in this project");
+        }
+        project.getUsers().add(addUser);
+        projectRepository.save(project);
+        return ResponseEntity.ok("user added");
+    }
+
+    @Override
+    public ResponseEntity<String> addUserToProjectbymail(UserDetails userDetails, Long projectId, String Email) {
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(()-> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project=projectRepository.findById(projectId).orElseThrow(() -> new EntityNotFoundException("Project not found"));
+        if (!project.getOwner().equals(user)) {
+            return ResponseEntity.ok("You do not have permission ");
+        }
+        User addUser=userRepository.findByEmail(Email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        if(addUser.getProjects().contains(project)){
+            throw new RuntimeException("User already exists in this project");
+        }
+        project.getUsers().add(addUser);
+        projectRepository.save(project);
+        return ResponseEntity.ok("user added");
     }
 
 
