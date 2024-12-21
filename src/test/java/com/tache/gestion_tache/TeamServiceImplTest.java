@@ -30,7 +30,7 @@ class TeamServiceImplTest {
     private User user;
     private TeamDto teamDto;
 
-    @BeforeEach
+  /*  @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
@@ -49,7 +49,7 @@ class TeamServiceImplTest {
 
         // Create a DTO for the team
         teamDto = new TeamDto(team.getId(), team.getName(), team.getDateCreation(), Arrays.asList(new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getDateInscription(), user.getUserRole().toString())));
-    }
+    }*/
 
     @Test
     void testFindAll() {

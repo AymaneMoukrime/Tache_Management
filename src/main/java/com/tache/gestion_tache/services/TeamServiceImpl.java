@@ -77,6 +77,7 @@ public class TeamServiceImpl implements TeamService {
                 team.getId(),
                 team.getName(),
                 team.getDateCreation(),
+                team.getProject().getId(),
                 userDTOs
         );
     }

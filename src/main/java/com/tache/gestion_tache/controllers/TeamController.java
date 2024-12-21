@@ -175,6 +175,8 @@ public class TeamController {
         return ResponseEntity.ok(teamService.findByUser(user));
     }
 
+
+
     private TeamDto convertToDTO(Team team) {
         TeamDto teamDTO = new TeamDto();
         teamDTO.setId(team.getId());

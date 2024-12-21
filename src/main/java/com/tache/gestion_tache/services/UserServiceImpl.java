@@ -160,9 +160,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private TeamDto mapToTeamResponse(Team team) {
+        List<UserResponse> users = team.getUsers().stream()
+                .map(this::mapToUserResponse)
+                .toList();
+
         return new TeamDto(
                 team.getId(),
-                team.getName()
+                team.getName(),
+                team.getDateCreation(),
+                team.getProject().getId(),
+                users
         );
     }
 

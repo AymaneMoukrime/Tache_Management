@@ -15,6 +15,7 @@ public class TeamDto {
         private Long id;
         private String name;
         private Date dateCreation;
+        private Long projectid;
         private List<UserResponse> users;
 
         public TeamDto(Long id, String name, Date dateCreation) {
@@ -22,6 +23,13 @@ public class TeamDto {
                 this.name = name;
                 this.dateCreation = dateCreation;
         }
+        public TeamDto(Long id, String name, Date dateCreation,Long projectid) {
+                this.id = id;
+                this.name = name;
+                this.dateCreation = dateCreation;
+                this.projectid = projectid;
+        }
+
 
         public TeamDto(Long id, String name) {
                 this.id = id;
