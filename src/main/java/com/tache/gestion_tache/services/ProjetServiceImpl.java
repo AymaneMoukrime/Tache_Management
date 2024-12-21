@@ -168,6 +168,12 @@ Project ModifiedProject = projectRepository.save(existingProject);
             throw new RuntimeException("You do not have permission ");
         }
         User ExistenUser=userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        for (Team team : project.getTeams()) {
+            team.getUsers().remove(ExistenUser);
+            teamRepository.save(team); // Save the updated team
+        }
+
+        // Remove user from the project itself
         project.getUsers().remove(ExistenUser);
         projectRepository.save(project);
         return ResponseEntity.ok("User removed From project");
@@ -183,6 +189,10 @@ Project ModifiedProject = projectRepository.save(existingProject);
             throw new RuntimeException("You do not have permission ");
         }
         User ExistenUser=userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        for (Team team : project.getTeams()) {
+            team.getUsers().remove(ExistenUser);
+            teamRepository.save(team); // Save the updated team
+        }
         project.getUsers().remove(ExistenUser);
         projectRepository.save(project);
         return ResponseEntity.ok("User removed from project");
