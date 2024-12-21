@@ -66,8 +66,8 @@ public class TeamController {
     }
 
 
-    @GetMapping("/teamname/{projectid}/{teamname}")
-    public ResponseEntity<?> findteambyname(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable String teamname) {
+    @GetMapping("/teamname/{projectid}")
+    public ResponseEntity<?> findteambyname(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@RequestParam String teamname) {
         User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
         TeamDto teamDTO = teamService.findByName(teamname,user.getId(),projectid);
         if(teamDTO==null) {
@@ -76,6 +76,22 @@ public class TeamController {
 
         return ResponseEntity.ok(teamDTO);
     }
+
+    @GetMapping("/teamid/{projectid}/{teamid}")
+    public ResponseEntity<?> findteambyid(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long teamid) {
+        User user=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getUsername()));
+        Project project=projectRepository.findById(projectid).orElseThrow(() -> new RuntimeException("Project not found"));
+        if(!project.getUsers().contains(user)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you are not autorized to do this");
+        }
+        TeamDto teamDTO = teamService.findByid(teamid);
+        if(teamDTO==null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("no team by that name");
+        }
+
+        return ResponseEntity.ok(teamDTO);
+    }
+
     @PostMapping("/asignUsertoTeam/{projectid}/{teamid}")
     public  ResponseEntity<?> assignUserToTeam(@AuthenticationPrincipal UserDetails userDetails,@PathVariable Long projectid,@PathVariable Long teamid,@RequestParam String Email) {
         Project project=projectRepository.findById(projectid).orElseThrow(() -> new RuntimeException("Project not found"));

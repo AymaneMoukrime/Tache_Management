@@ -12,4 +12,5 @@ public interface TeamService {
 
     List<TeamDto> findAlladmin();
     TeamDto findById(Long teamId);
+    TeamDto findByid(Long teamid);
 }

@@ -26,6 +26,13 @@ public class TeamServiceImpl implements TeamService {
                 .map(this::mapToTeamDto)
                 .orElse(null); // or throw an exception like new NotFoundException("Team not found")
     }
+
+    @Override
+    public TeamDto findByid(Long teamid) throws RuntimeException {
+        return teamRepository.findById(teamid)
+                .map(this::mapToTeamDto)
+                .orElse(null); // or throw an exception like new NotFoundException("Team not found")
+    }
 @Override
     public List<TeamDto> findByUser(User user) {
         List<Team> teams = teamRepository.findByUsers(user);
