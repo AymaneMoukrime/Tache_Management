@@ -130,11 +130,9 @@ public class TaskServiceImpl implements TaskService {
         }
 
         // Validate assigned user if email is provided
-        User assignedUser = null;
-        if (email != null && !email.isBlank()) {
-            assignedUser = userRepository.findByEmail(email)
+        User assignedUser = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Assigned user not found"));
-        }
+
 
         // Check for duplicate task
         if (project.getTasks().contains(task)) {
@@ -151,7 +149,10 @@ public class TaskServiceImpl implements TaskService {
         task.setUser(assignedUser != null ? assignedUser : user); // Default to creator if no assigned user
         task.setOwner(user);
         task.setStatus(TaskStatus.TODO);
-        project.getUsers().add(assignedUser);
+        if(!project.getUsers().contains(assignedUser)){
+            project.getUsers().add(assignedUser);
+            projectRepository.save(project);
+        }
         projectRepository.save(project);
 
         // Save task
@@ -181,8 +182,11 @@ public class TaskServiceImpl implements TaskService {
 
         // Assign the task
         task.setUser(assignedUser);
-        project.getUsers().add(assignedUser);
-        projectRepository.save(project);
+        if(!project.getUsers().contains(assignedUser)){
+            project.getUsers().add(assignedUser);
+            projectRepository.save(project);
+        }
+
 
         // Save the updated task
         taskRepository.save(task);

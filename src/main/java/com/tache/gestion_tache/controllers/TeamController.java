@@ -106,8 +106,10 @@ public class TeamController {
         }
         team.getUsers().add(adduser);
         teamRepository.save(team);
-        project.getUsers().add(adduser);
-        projectRepository.save(project);
+        if(!project.getUsers().contains(adduser)){
+            project.getUsers().add(adduser);
+            projectRepository.save(project);
+        }
         TeamDto teamDTO = convertToDTO(team);
 
         return ResponseEntity.ok(teamDTO);
