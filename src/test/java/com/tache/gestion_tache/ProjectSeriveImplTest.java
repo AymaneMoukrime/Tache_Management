@@ -14,9 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -73,6 +76,65 @@ class ProjetServiceImplTest {
         task = new Task();
         task.setId(1L);
     }
+
+    @Test
+    void testGetByid_UserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.getByid(userDetails, 1L);
+        });
+
+        assertEquals("User not found with email: testuser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testGetByid_ProjectNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.getByid(userDetails, 1L);
+        });
+
+        assertEquals("Project not found with id: 1", exception.getMessage());
+    }
+
+    @Test
+    void testGetByid_UserCannotAccessProject() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        project.getUsers().clear(); // Ensure the user is not part of the project
+
+        Exception exception = assertThrows(IllegalAccessException.class, () -> {
+            projetService.getByid(userDetails, 1L);
+        });
+
+        assertEquals("cannot access this", exception.getMessage());
+    }
+
+    @Test
+    void testGetByid_Success() throws IllegalAccessException {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        project.getUsers().add(user); // Ensure the user is part of the project
+
+        ProjectResponse response = projetService.getByid(userDetails, 1L);
+
+        assertNotNull(response);
+        assertEquals("Test Project", response.getName());
+    }
+
 
     // Test for adding a project
     @Test
@@ -212,4 +274,437 @@ class ProjetServiceImplTest {
         assertNotNull(response);
         assertFalse(response.isEmpty());
     }
+
+    @Test
+    void testAddTaskToProject_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        Project project = new Project();
+        project.setOwner(new User());  // Different owner
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(RuntimeException.class, () -> projetService.addTaskToProject(userDetails, 1L, 1L));
+    }
+    @Test
+    void testAddUserToProjectById_UserAlreadyExists() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(user);
+        project.getUsers().add(user);
+        user.getProjects().add(project);
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        assertThrows(RuntimeException.class, () -> projetService.addUserToProjectbyid(userDetails, 1L, 1L));
+    }
+    @Test
+    void testAddTeamToProject_TeamAlreadyExists() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(user);
+
+        Team team = new Team();
+        team.setId(1L);
+        project.getTeams().add(team);
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(teamRepository.findById(1L)).thenReturn(Optional.of(team));
+
+        assertThrows(RuntimeException.class, () -> projetService.addTeamToProject(userDetails, 1L, 1L));
+    }
+
+    @Test
+    void testGetByid_UserDoesNotHaveAccess() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(IllegalAccessException.class, () -> projetService.getByid(userDetails, 1L));
+    }
+  /*  @Test
+    void testAddUserToProjectByEmail_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(new User());// Different owner
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(RuntimeException.class, () -> projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com"));
+    }*/
+    @Test
+    void testRemoveUserFromProjectByEmail_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(new User());  // Different owner
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(RuntimeException.class, () -> projetService.removeUserFromProjectBymail(userDetails, 1L, "user@example.com"));
+    }
+    @Test
+    void testAddTeamToProject_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(new User());  // Different owner
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(RuntimeException.class, () -> projetService.addTeamToProject(userDetails, 1L, 1L));
+    }
+    @Test
+    void testRemoveUserFromProject_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        Project project = new Project();
+        project.setId(1L);
+        project.setOwner(new User());  // Different owner
+
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        assertThrows(RuntimeException.class, () -> projetService.removeUserFromProject(userDetails, 1L, 1L));
+    }
+
+    @Test
+    void testRemoveUserFromProject_UserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.removeUserFromProject(userDetails, 1L, 1L);
+        });
+
+        assertEquals("User not found with email: testuser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProject_ProjectNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.removeUserFromProject(userDetails, 1L, 1L);
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+    }
+
+
+    @Test
+    void testRemoveUserFromProject_ExistenUserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.removeUserFromProject(userDetails, 1L, 1L);
+        });
+
+        assertEquals("User not found", exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProject_Success() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        project.setOwner(user); // Ensure the user is the owner
+        project.getUsers().add(user); // Ensure the user is part of the project
+
+        ResponseEntity<String> response = projetService.removeUserFromProject(userDetails, 1L, 1L);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("User removed From project", response.getBody());
+    }
+
+    @Test
+    void testRemoveUserFromProjectBymail_UserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.removeUserFromProjectBymail(userDetails, 1L, "testuser@example.com");
+        });
+
+        assertEquals("User not found with email: testuser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProjectBymail_ProjectNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.removeUserFromProjectBymail(userDetails, 1L, "testuser@example.com");
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProjectBymail_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        project.setOwner(new User()); // Ensure the user is not the owner
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.removeUserFromProjectBymail(userDetails, 1L, "testuser@example.com");
+        });
+
+        assertEquals("You do not have permission ", exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProjectBymail_ExistenUserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.removeUserFromProjectBymail(userDetails, 1L, "testuser@example.com");
+        });
+
+        assertEquals("User not found with email: "+userDetails.getUsername(), exception.getMessage());
+    }
+
+    @Test
+    void testRemoveUserFromProjectBymail_Success() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
+
+        project.setOwner(user); // Ensure the user is the owner
+        project.getUsers().add(user); // Ensure the user is part of the project
+
+        ResponseEntity<String> response = projetService.removeUserFromProjectBymail(userDetails, 1L, "testuser@example.com");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("User removed from project", response.getBody());
+    }
+
+    @Test
+    void testAllUsersProject_UserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.allUsersProject(userDetails, 1L);
+        });
+
+        assertEquals("User not found with email: testuser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testAllUsersProject_ProjectNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.allUsersProject(userDetails, 1L);
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+    }
+
+    @Test
+    void testAllUsersProject_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        project.getUsers().clear(); // Ensure the user is not part of the project
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.allUsersProject(userDetails, 1L);
+        });
+
+        assertEquals("You do not have permission ", exception.getMessage());
+    }
+
+
+    @Test
+    void testAddUserToProjectbymail_UserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+        });
+
+        assertEquals("User not found with email: testuser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testAddUserToProjectbymail_ProjectNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+        });
+
+        assertEquals("Project not found", exception.getMessage());
+    }
+
+    @Test
+    void testAddUserToProjectbymail_NoPermission() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        project.setOwner(new User()); // Ensure the user is not the owner
+
+        ResponseEntity<String> response = projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+
+        assertEquals("You do not have permission ", response.getBody());
+    }
+
+    @Test
+    void testAddUserToProjectbymail_ExistenUserNotFound() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findByEmail("newuser@example.com")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> {
+            projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+        });
+
+        assertEquals("User not found", exception.getMessage());
+    }
+
+    @Test
+    void testAddUserToProjectbymail_UserAlreadyExists() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findByEmail("newuser@example.com")).thenReturn(Optional.of(user));
+
+        project.setOwner(user); // Ensure the user is the owner
+        user.getProjects().add(project); // Ensure the user is already part of the project
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+        });
+
+        assertEquals("User already exists in this project", exception.getMessage());
+    }
+
+    @Test
+    void testAddUserToProjectbymail_Success() {
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetails.getUsername()).thenReturn("testuser@example.com");
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(user));
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(userRepository.findByEmail("newuser@example.com")).thenReturn(Optional.of(user));
+
+        project.setOwner(user); // Ensure the user is the owner
+
+        ResponseEntity<String> response = projetService.addUserToProjectbymail(userDetails, 1L, "newuser@example.com");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("user added", response.getBody());
+    }
+
+    @Test
+    void testGetProject_ProjectNotFound() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            projetService.getProject(1L);
+        });
+
+        assertEquals("Project not found with id: 1", exception.getMessage());
+    }
+
+    @Test
+    void testGetProject_Success() {
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+
+        Project result = projetService.getProject(1L);
+
+        assertNotNull(result);
+        assertEquals("Test Project", result.getName());
+    }
+
+    @Test
+    void testFindAll_Success() {
+        List<Project> projects = Arrays.asList(project);
+        when(projectRepository.findAll()).thenReturn(projects);
+
+        List<ProjectResponse> responses = projetService.findAll();
+
+        assertNotNull(responses);
+        assertFalse(responses.isEmpty());
+        assertEquals("Test Project", responses.get(0).getName());
+    }
+
+
+
+
 }

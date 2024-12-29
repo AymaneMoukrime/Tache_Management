@@ -82,4 +82,78 @@ public class ProjectControllerTest {
         assertEquals(projectResponses, response);
         verify(projectService, times(1)).getAllProjectsForUser(userDetails);
     }
+
+    @Test
+    void testRemoveUserFromProjectBymail() {
+        Long projectId = 1L;
+        String email = "testuser@example.com";
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("User removed From project");
+
+        when(projectService.removeUserFromProjectBymail(any(UserDetails.class), eq(projectId), eq(email)))
+                .thenReturn(expectedResponse);
+
+        ResponseEntity<String> response = projectController.removeUserFromProjectBymail(userDetails, projectId, email);
+
+        assertEquals(expectedResponse, response);
+        verify(projectService, times(1)).removeUserFromProjectBymail(userDetails, projectId, email);
+    }
+
+    @Test
+    void testGettAllUserOfProject() {
+        Long projectId = 1L;
+        List<String> expectedUsers = List.of("user1@example.com", "user2@example.com");
+
+        when(projectService.allUsersProject(any(UserDetails.class), eq(projectId)))
+                .thenReturn(expectedUsers);
+
+        List<String> response = projectController.gettAllUserOfProject(userDetails, projectId);
+
+        assertEquals(expectedUsers, response);
+        verify(projectService, times(1)).allUsersProject(userDetails, projectId);
+    }
+
+    @Test
+    void testAddUserToProjectByid() {
+        Long projectId = 1L;
+        Long userId = 2L;
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("User added to project");
+
+        when(projectService.addUserToProjectbyid(any(UserDetails.class), eq(projectId), eq(userId)))
+                .thenReturn(expectedResponse);
+
+        ResponseEntity<String> response = projectController.addUserToProjectByid(userDetails, projectId, userId);
+
+        assertEquals(expectedResponse, response);
+        verify(projectService, times(1)).addUserToProjectbyid(userDetails, projectId, userId);
+    }
+
+    @Test
+    void testAddUserToProjectBymail() {
+        Long projectId = 1L;
+        String email = "testuser@example.com";
+        ResponseEntity<String> expectedResponse = ResponseEntity.ok("User added to project");
+
+        when(projectService.addUserToProjectbymail(any(UserDetails.class), eq(projectId), eq(email)))
+                .thenReturn(expectedResponse);
+
+        ResponseEntity<String> response = projectController.addUserToProjectByid(userDetails, projectId, email);
+
+        assertEquals(expectedResponse, response);
+        verify(projectService, times(1)).addUserToProjectbymail(userDetails, projectId, email);
+    }
+
+    @Test
+    void testGetProject() throws IllegalAccessException {
+        Long projectId = 1L;
+        ProjectResponse expectedResponse = new ProjectResponse();
+
+        when(projectService.getByid(any(UserDetails.class), eq(projectId)))
+                .thenReturn(expectedResponse);
+
+        ProjectResponse response = projectController.getProject(userDetails, projectId);
+
+        assertEquals(expectedResponse, response);
+        verify(projectService, times(1)).getByid(userDetails, projectId);
+    }
+
 }

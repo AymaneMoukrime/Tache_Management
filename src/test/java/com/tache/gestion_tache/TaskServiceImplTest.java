@@ -2,6 +2,7 @@ package com.tache.gestion_tache;
 
 import com.tache.gestion_tache.dto.TaskDto;
 import com.tache.gestion_tache.entities.*;
+import com.tache.gestion_tache.repositories.ProjectRepository;
 import com.tache.gestion_tache.repositories.TaskRepository;
 import com.tache.gestion_tache.repositories.UserRepository;
 import com.tache.gestion_tache.services.ProjectService;
@@ -15,11 +16,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -35,6 +37,9 @@ public class TaskServiceImplTest {
 
     @Mock
     private ProjectService projectService;
+
+    @Mock
+    private ProjectRepository projectRepository;
 
     @Mock
     private UserDetails userDetails;
@@ -310,6 +315,221 @@ public class TaskServiceImplTest {
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertEquals("You are not authorized to perform this action", response.getBody());
     }
+
+    @Test
+    void testSaveTaskWithAssign_UserNotFound() {
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+        });
+
+        assertEquals("User not found with email: test@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_ProjectNotFound() {
+        when(projectService.getProject(1L)).thenReturn(null);
+
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        ResponseEntity<?> response = taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Project not found", response.getBody());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_Unauthorized() {
+        mockProject.setOwner(new User()); // Ensure the user is not the owner
+
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        ResponseEntity<?> response = taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("You are not authorized to perform this action", response.getBody());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_AssignedUserNotFound() {
+        when(userRepository.findByEmail("assigneduser@example.com")).thenReturn(Optional.empty());
+
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+        });
+
+        assertEquals("Assigned user not found", exception.getMessage());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_TaskAlreadyExists() {
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        mockProject.getTasks().add(task); // Ensure the task already exists in the project
+
+        ResponseEntity<?> response = taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("Task already exists", response.getBody());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_DeadlineBeforeCurrentDate() {
+        Task task = new Task();
+        task.setTitre("Test Task");
+        task.setDateDeadline(new Date(System.currentTimeMillis() - 1000)); // Set deadline before current date
+
+        ResponseEntity<?> response = taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
+        assertEquals("Deadline is before the current date", response.getBody());
+    }
+
+    @Test
+    void testSaveTaskWithAssign_Success() {
+        Task task = new Task();
+        task.setTitre("Test Task");
+
+        User assignedUser = new User();
+        assignedUser.setId(2L);
+        assignedUser.setEmail("assigneduser@example.com");
+
+        when(userRepository.findByEmail("assigneduser@example.com")).thenReturn(Optional.of(assignedUser));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
+
+        ResponseEntity<?> response = taskService.saveTaskWithAssign(1L, userDetails, task, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+    }
+
+    @Test
+    void testAssignTask_UserNotFound() {
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            taskService.assignTask(1L, userDetails, "assigneduser@example.com");
+        });
+
+        assertEquals("User not found with email: test@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testAssignTask_TaskNotFound() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            taskService.assignTask(1L, userDetails, "assigneduser@example.com");
+        });
+
+        assertEquals("Task not found with ID: 1", exception.getMessage());
+    }
+
+    @Test
+    void testAssignTask_Unauthorized() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setOwner(new User()); // Ensure the user is not the owner
+        task.setProject(mockProject);
+
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+
+        ResponseEntity<?> response = taskService.assignTask(1L, userDetails, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals("Only the task owner can assign this task", response.getBody());
+    }
+
+    @Test
+    void testAssignTask_AssignedUserNotFound() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setOwner(mockUser); // Ensure the user is the owner
+        task.setProject(mockProject);
+
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(userRepository.findByEmail("assigneduser@example.com")).thenReturn(Optional.empty());
+
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            taskService.assignTask(1L, userDetails, "assigneduser@example.com");
+        });
+
+        assertEquals("Assigned user not found with email: assigneduser@example.com", exception.getMessage());
+    }
+
+    @Test
+    void testAssignTask_Success() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setOwner(mockUser); // Ensure the user is the owner
+        task.setProject(mockProject);
+
+        User assignedUser = new User();
+        assignedUser.setId(2L);
+        assignedUser.setEmail("assigneduser@example.com");
+
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(userRepository.findByEmail("assigneduser@example.com")).thenReturn(Optional.of(assignedUser));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        when(projectRepository.save(any(Project.class))).thenReturn(mockProject);
+
+        ResponseEntity<?> response = taskService.assignTask(1L, userDetails, "assigneduser@example.com");
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Task successfully assigned to user: assigneduser@example.com", response.getBody());
+    }
+
+    @Test
+    void testFindAllTasks_Success() {
+        when(userRepository.findByEmail(userDetails.getUsername())).thenReturn(Optional.of(mockUser));
+        when(projectService.getProject(1L)).thenReturn(mockProject);
+        Task task = new Task();
+        task.setId(1L);
+        task.setTitre("Test Task");
+        task.setDescription("Test Description");
+        task.setDateCreation(new Date());
+        task.setDateDeadline(new Date());
+        task.setPriorite(1l);
+        task.setStatus(TaskStatus.TODO);
+        task.setCouleur("Red");
+        task.setOwner(mockUser);
+        task.setUser(mockUser);
+        mockProject.getUsers().add(mockUser);
+        mockUser.getProjects().add(mockProject);
+
+        List<Task> tasks = Arrays.asList(task);
+        when(taskRepository.findByProject(mockProject)).thenReturn(tasks);
+
+        List<TaskDto> taskDtos = taskService.findAllTasks(1L, userDetails);
+
+        assertNotNull(taskDtos);
+        assertFalse(taskDtos.isEmpty());
+        assertEquals(1, taskDtos.size());
+        assertEquals("Test Task", taskDtos.get(0).getTitle());
+        assertEquals("Test Description", taskDtos.get(0).getDescription());
+        assertEquals(1, taskDtos.get(0).getPriorite());
+        assertEquals(TaskStatus.TODO, taskDtos.get(0).getStatus());
+        assertEquals("Red", taskDtos.get(0).getCouleur());
+        assertEquals("test@example.com", taskDtos.get(0).getTaskOwnerEmail());
+        assertEquals("test@example.com", taskDtos.get(0).getTaskUserEmail());
+    }
+
+
+
+
+
+
 
 
 }

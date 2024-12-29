@@ -21,6 +21,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -182,6 +184,8 @@ public class UserServiceImplTest {
         team.setId(1L);
         team.setName("Team 1");
         teams.add(team);
+        Project project=new Project();
+        team.setProject(project);
         user.setTeams(teams);
 
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
@@ -194,6 +198,68 @@ public class UserServiceImplTest {
         assertEquals(1, teamDtos.size());
         assertEquals("Team 1", teamDtos.get(0).getName());
     }
+
+    @Test
+    public void testUserDetailService_UserExists() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+        UserDetailsService userDetailsService = userService.userDetailService();
+        UserDetails loadedUser = userDetailsService.loadUserByUsername("test@example.com");
+
+        assertNotNull(loadedUser);
+        assertEquals("test@example.com", loadedUser.getUsername());
+        assertEquals("encryptedPassword", loadedUser.getPassword());
+        assertEquals(1, loadedUser.getAuthorities().size());
+        assertEquals("NORMAL", loadedUser.getAuthorities().iterator().next().getAuthority());
+    }
+
+    @Test
+    public void testUserDetailService_UserNotFound() {
+        when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
+
+        UserDetailsService userDetailsService = userService.userDetailService();
+
+        assertThrows(UsernameNotFoundException.class, () -> {
+            userDetailsService.loadUserByUsername("nonexistent@example.com");
+        });
+    }
+
+    @Test
+    public void testFindAll() {
+        List<User> users = List.of(user);
+        when(userRepository.findAll()).thenReturn(users);
+
+        List<UserResponse> userResponses = userService.findAll();
+
+        assertNotNull(userResponses);
+        assertEquals(1, userResponses.size());
+        assertEquals("test@example.com", userResponses.get(0).getEmail());
+    }
+
+    @Test
+    public void testFindalluser() {
+        List<User> users = List.of(user);
+        when(userRepository.findAll()).thenReturn(users);
+
+        List<User> foundUsers = userService.findalluser();
+
+        assertNotNull(foundUsers);
+        assertEquals(1, foundUsers.size());
+        assertEquals("test@example.com", foundUsers.get(0).getEmail());
+    }
+
+    @Test
+    public void testFindByName() {
+        List<User> users = List.of(user);
+        when(userRepository.findAllByNameStartingWith("Test")).thenReturn(users);
+
+        List<UserResponse> userResponses = userService.findByName("Test");
+
+        assertNotNull(userResponses);
+        assertEquals(1, userResponses.size());
+        assertEquals("test@example.com", userResponses.get(0).getEmail());
+    }
+
 
 
 

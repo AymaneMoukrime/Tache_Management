@@ -2,6 +2,7 @@ package com.tache.gestion_tache;
 
 import com.tache.gestion_tache.dto.TeamDto;
 import com.tache.gestion_tache.dto.UserResponse;
+import com.tache.gestion_tache.entities.Project;
 import com.tache.gestion_tache.entities.Team;
 import com.tache.gestion_tache.entities.User;
 import com.tache.gestion_tache.entities.UserRole;
@@ -29,8 +30,9 @@ class TeamServiceImplTest {
     private Team team;
     private User user;
     private TeamDto teamDto;
+    private Project project;
 
-  /*  @BeforeEach
+   @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
@@ -46,10 +48,14 @@ class TeamServiceImplTest {
         team.setName("Team A");
         team.setDateCreation(java.sql.Date.valueOf("2022-01-01"));
         team.setUsers(Arrays.asList(user));
+        project=new Project();
+        team.setProject(project);
+
+
 
         // Create a DTO for the team
-        teamDto = new TeamDto(team.getId(), team.getName(), team.getDateCreation(), Arrays.asList(new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getDateInscription(), user.getUserRole().toString())));
-    }*/
+        teamDto = new TeamDto(team.getId(), team.getName(), team.getDateCreation(), 1L,Arrays.asList(new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getDateInscription(), user.getUserRole().toString())));
+    }
 
     @Test
     void testFindAll() {
