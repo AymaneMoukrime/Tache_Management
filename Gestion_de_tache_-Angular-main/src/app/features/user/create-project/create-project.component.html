@@ -1,0 +1,17 @@
+<form (ngSubmit)="onSubmit()">
+    <div>
+      <label for="name">Project Name</label>
+      <input id="name" type="text" [(ngModel)]="project.name" name="name" required />
+    </div>
+    <div>
+      <label for="description">Project Description</label>
+      <textarea
+        id="description"
+        [(ngModel)]="project.description"
+        name="description"
+        required>
+      </textarea>
+    </div>
+    <button type="submit">Create Project</button>
+  </form>
+  

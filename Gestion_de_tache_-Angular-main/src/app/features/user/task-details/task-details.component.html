@@ -1,0 +1,51 @@
+<div class="task-detail">
+    <h2>Task Details</h2>
+  
+    <form (ngSubmit)="updateTask()">
+      <label for="title">Title:</label>
+      <input type="text" id="title" [(ngModel)]="task.title" name="title" required />
+  
+      <label for="description">Description:</label>
+      <textarea id="description" [(ngModel)]="task.description" name="description" required></textarea>
+  
+      <label for="priority">Priority:</label>
+      <input type="number" id="priority" [(ngModel)]="task.priorite" name="priority" required />
+  
+      <label for="deadline">Deadline:</label>
+      <input type="date" id="deadline" [(ngModel)]="task.dateDeadline" name="deadline" required />
+  
+      <label for="status">Status:</label>
+      <select id="status" [(ngModel)]="task.status" name="status" required>
+        <option value="TODO">TODO</option>
+        <option value="IN_PROGRESS">IN_PROGRESS</option>
+        <option value="DONE">DONE</option>
+      </select>
+      <label for="taskColor">Color:</label>
+      <input
+        type="color"
+        id="taskColor"
+        [(ngModel)]="task.couleur"
+        name="couleur"
+        required
+      />
+  
+      <button type="submit">Update Task</button>
+    </form>
+  
+    <hr />
+    <h3>Assigned User</h3>
+    <p><strong>Assigned To:</strong> {{ task.taskUserEmail }}</p>
+
+
+    <h3>Assign Task to User</h3>
+    <label for="user">Select User:</label>
+    <select id="user" [(ngModel)]="selectedUser" name="user">
+      <option *ngFor="let user of users" [value]="user">{{ user }}</option>
+    </select>
+    <button (click)="assignTask()">Assign Task</button>
+  
+    <hr />
+  
+    <div *ngIf="message" class="message">{{ message }}</div>
+  </div>
+  

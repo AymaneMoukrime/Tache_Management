@@ -1,0 +1,83 @@
+<div *ngIf="isLoading" class="loading">Loading project...</div>
+
+<div *ngIf="!isLoading && !errorMessage" class="project-form">
+  <h2>Edit Project</h2>
+
+  <form (ngSubmit)="onUpdateProject()">
+    <label for="name">Project Name</label>
+    <input
+      id="name"
+      type="text"
+      [(ngModel)]="project.name"
+      name="name"
+      required
+      placeholder="Enter project name"
+    />
+  
+    <label for="description">Project Description</label>
+    <textarea
+      id="description"
+      [(ngModel)]="project.description"
+      name="description"
+      required
+      placeholder="Enter project description"
+    ></textarea>
+  
+    <label for="startDate">Start Date</label>
+    <input
+      id="startDate"
+      type="date"
+      [(ngModel)]="project.startDate"
+      name="startDate"
+      required
+    />
+  
+    <label for="endDate">End Date</label>
+    <input
+      id="endDate"
+      type="date"
+      [(ngModel)]="project.endDate"
+      name="endDate"
+      required
+    />
+  
+    <div *ngIf="project.endDate && project.startDate && project.endDate < project.startDate" class="error-message">
+      End date cannot be before the start date.
+    </div>
+    
+    <button
+      type="submit"
+      [disabled]="!project.endDate || !project.startDate || project.endDate < project.startDate"
+    >
+      Update Project
+    </button>
+    
+  </form>
+</div>
+
+<div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+<div *ngIf="!isLoading && projectUsers.length > 0" class="user-management">
+  <h3>Project Users</h3>
+  <ul>
+    <li *ngFor="let user of projectUsers">
+      <span>{{ user }}</span>
+      <button (click)="removeUserFromProject(user)">Remove</button>
+    </li>
+  </ul>
+</div>
+
+<div class="add-user">
+  <h3>Add User to Project</h3>
+  <input
+    type="email"
+    [(ngModel)]="newUserEmail"
+    name="newUserEmail"
+    placeholder="Enter user email"
+  />
+  <button (click)="addUserToProject()">Add User</button>
+</div>
+
+
+
+
+

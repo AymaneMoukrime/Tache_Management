@@ -1,0 +1,19 @@
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .dashboard-container app-user-sidebar,
+  .dashboard-container app-admin-sidebar {
+    width: 250px; /* Sidebar width */
+    background-color: #f4f4f4; /* Background color */
+    padding: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-container .main-content {
+    flex: 1; /* Fills the remaining space */
+    padding: 20px;
+    overflow-y: auto; /* Scrollable content */
+  }
+  

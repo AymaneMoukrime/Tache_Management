@@ -1,0 +1,181 @@
+<div class="container">
+  <!-- Filters Section -->
+  <div class="filters">
+    <button (click)="filterTasks('ALL Tasks')">ALL Tasks</button>
+    <button (click)="filterTasks('IN_PROGRESS')">Ongoing Tasks</button>
+    <button (click)="filterTasks('DONE')">Completed Tasks</button>
+    <button (click)="filterTasks('TODO')">TODO Tasks</button>
+    <button (click)="filterTasks('delayed')">Delayed Tasks</button>
+    <button (click)="filterTasks('MyTask')">My Tasks</button>
+  </div>
+
+  <!-- Tasks Grid -->
+  <div class="tasks-grid">
+    <div class="priority-column high-priority">
+      <h3 class="priority-heading">High</h3>
+      <ng-container *ngFor="let task of filteredTasks">
+        <div class="task-item" *ngIf="task.priorite === 1"  >
+          <span class="color-bar" [ngStyle]="{'background-color': task.couleur}"></span>
+          <div *ngIf="currentUserId === projectOwnerId" class="update-btn">
+            <button [routerLink]="['/user/task-detail', projectId, task.id]" >
+              Update
+              <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M13.485 1.515a3.5 3.5 0 0 1 0 4.95l-7.071 7.071-4.95-4.95 7.07-7.071a3.5 3.5 0 0 1 4.951 0zM6.343 10.101L2.343 6.1l7.071-7.07a1.5 1.5 0 1 1 2.121 2.121l-7.071 7.071z"/>
+              </svg>
+            </button>
+            <button
+            *ngIf="currentUserId === projectOwnerId"
+            (click)="deleteTask(task.id)"
+          >
+            Delete
+          </button>
+          </div>
+          <h4>Title : {{ task.title }}</h4>
+          <p><strong>Description:</strong> {{ task.description }}</p>
+          <p><strong>DateEnd:</strong> {{ task.dateDeadline }}</p>
+          <p><strong>Assigned To:</strong> {{ task.taskUserEmail || null }}</p>
+          <p>
+            <strong>Status:</strong>
+            <span
+              class="status clickable"
+              (click)="updateTaskStatus(task)"
+              [ngClass]="{
+                'in-progress': task.status === 'IN_PROGRESS',
+                'done': task.status === 'DONE',
+                'todo': task.status === 'TODO'
+              }"
+            >
+              {{ task.status }}
+            </span>
+          </p>
+        </div>
+      </ng-container>
+    </div>
+  
+    <div class="priority-column medium-priority">
+      <h3 class="priority-heading">Medium</h3>
+      <ng-container *ngFor="let task of filteredTasks">
+        <div class="task-item" *ngIf="task.priorite === 2"  >
+          <span class="color-bar" [ngStyle]="{'background-color': task.couleur}"></span>
+          <div *ngIf="currentUserId === projectOwnerId" class="update-btn">
+            <button [routerLink]="['/user/task-detail', projectId, task.id]" >
+              Update
+              <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M13.485 1.515a3.5 3.5 0 0 1 0 4.95l-7.071 7.071-4.95-4.95 7.07-7.071a3.5 3.5 0 0 1 4.951 0zM6.343 10.101L2.343 6.1l7.071-7.07a1.5 1.5 0 1 1 2.121 2.121l-7.071 7.071z"/>
+              </svg>
+            </button>
+            <button
+            *ngIf="currentUserId === projectOwnerId"
+            (click)="deleteTask(task.id)"
+          >
+            Delete
+          </button>
+          </div>
+          <h4>Title : {{ task.title }}</h4>
+          <p><strong>Description:</strong> {{ task.description }}</p>
+          <p><strong>DateEnd:</strong> {{ task.dateDeadline }}</p>
+          <p><strong>Assigned To:</strong> {{ task.taskUserEmail || null }}</p>
+          <p>
+            <strong>Status:</strong>
+            <span
+              class="status clickable"
+              (click)="updateTaskStatus(task)"
+              [ngClass]="{
+                'in-progress': task.status === 'IN_PROGRESS',
+                'done': task.status === 'DONE',
+                'todo': task.status === 'TODO'
+              }"
+            >
+              {{ task.status }}
+            </span>
+          </p>
+        </div>
+      </ng-container>
+    </div>
+  
+    <div class="priority-column low-priority">
+      <h3 class="priority-heading">Low</h3>
+      <ng-container *ngFor="let task of filteredTasks">
+        <div class="task-item" *ngIf="task.priorite === 3">
+          <span class="color-bar" [ngStyle]="{'background-color': task.couleur}"></span>
+          <div *ngIf="currentUserId === projectOwnerId" class="update-btn">
+            <button [routerLink]="['/user/task-detail', projectId, task.id]" >
+              Update
+              <svg xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M13.485 1.515a3.5 3.5 0 0 1 0 4.95l-7.071 7.071-4.95-4.95 7.07-7.071a3.5 3.5 0 0 1 4.951 0zM6.343 10.101L2.343 6.1l7.071-7.07a1.5 1.5 0 1 1 2.121 2.121l-7.071 7.071z"/>
+              </svg>
+            </button>
+            <button
+            *ngIf="currentUserId === projectOwnerId"
+            (click)="deleteTask(task.id)"
+          >
+            Delete
+          </button>
+          </div>
+          <h4>Title : {{ task.title }}</h4>
+          <p><strong>Description:</strong> {{ task.description }}</p>
+          <p><strong>DateEnd:</strong> {{ task.dateDeadline }}</p>
+          <p><strong>Assigned To:</strong> {{ task.taskUserEmail || null }}</p>
+          <p>
+            <strong>Status:</strong>
+            <span
+              class="status clickable"
+              (click)="updateTaskStatus(task)"
+              [ngClass]="{
+                'in-progress': task.status === 'IN_PROGRESS',
+                'done': task.status === 'DONE',
+                'todo': task.status === 'TODO'
+              }"
+            >
+              {{ task.status }}
+            </span>
+          </p>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  
+
+  <!-- Task Creation Form -->
+  <div *ngIf="currentUserId === projectOwnerId" class="task-creation-container">
+    <h3>Create New Task</h3>
+    <form (ngSubmit)="createTask()">
+      <label for="taskTitle">Title:</label>
+      <input
+        type="text"
+        id="taskTitle"
+        [(ngModel)]="newTask.title"
+        name="title"
+        required
+        placeholder="Enter task title"
+      />
+
+      <label for="taskDescription">Description:</label>
+      <textarea
+        id="taskDescription"
+        [(ngModel)]="newTask.description"
+        name="description"
+        required
+        placeholder="Enter task description"
+      ></textarea>
+
+      <label for="taskPriority">Priority:</label>
+      <select id="taskPriority" [(ngModel)]="newTask.priorite" name="priorite" required>
+        <option value="1">High</option>
+        <option value="2">Medium</option>
+        <option value="3">Low</option>
+      </select>
+
+      <label for="taskColor">Color:</label>
+      <input
+        type="color"
+        id="taskColor"
+        [(ngModel)]="newTask.couleur"
+        name="couleur"
+        required
+      />
+
+      <button type="submit">Create Task</button>
+    </form>
+  </div>
+</div>

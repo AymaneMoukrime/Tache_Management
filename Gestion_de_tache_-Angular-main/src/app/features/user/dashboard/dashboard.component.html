@@ -1,0 +1,16 @@
+
+
+<div class="layout-container">
+    <app-user-navbar
+  [userName]="'Mathew'"
+  [userImage]="'assets/user-profile.jpg'"
+  [path]="'Projects'">
+</app-user-navbar>
+  <!-- Sidebar -->
+  <app-sidebar-user></app-sidebar-user>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

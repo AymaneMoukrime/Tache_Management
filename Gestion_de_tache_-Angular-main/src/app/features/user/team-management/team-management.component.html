@@ -1,0 +1,37 @@
+<div class="team-management">
+  <h2>Manage Team: {{ team?.name }}</h2>
+
+  <!-- Add User to Team -->
+  <div class="add-user">
+    <label for="userEmail">Add User by Email:</label>
+    <input
+      type="email"
+      id="userEmail"
+      [(ngModel)]="selectedUserEmail"
+      placeholder="Enter user email"
+      required
+    />
+    <button (click)="addUserToTeam()" [disabled]="!selectedUserEmail.trim()">Add User</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Existing Team Members -->
+  <div *ngIf="users.length > 0">
+    <h3>Team Members</h3>
+    <ul>
+      <li *ngFor="let user of users">
+        <span>{{ user.name }} ({{ user.email }})</span>
+        <button (click)="removeUserFromTeam(user.email)">Remove</button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- No Team Members Message -->
+  <div *ngIf="users.length === 0">
+    <p>No members in this team yet.</p>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="team-dashboard">
+    <h2>Create a New Team</h2>
+    <form (ngSubmit)="createTeam()">
+      <label for="project">Select Project</label>
+      <select id="project" [(ngModel)]="selectedProjectId" name="project" required>
+        <option value="0" disabled>Select a Project</option>
+        <!-- The value is bound to project.id to capture the projectId -->
+        <option *ngFor="let project of projects" [value]="project.id">{{ project.name }}</option>
+      </select>
+  
+      <label for="teamName">Team Name</label>
+      <input
+        id="teamName"
+        type="text"
+        [(ngModel)]="teamName"
+        name="teamName"
+        required
+        placeholder="Enter team name"
+      />
+  
+      <button type="submit" [disabled]="!teamName || selectedProjectId === 0">Create Team</button>
+    </form>
+  
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+  
+    <div *ngIf="teams.length > 0">
+      <h3>Existing Teams</h3>
+      <ul>
+        <li *ngFor="let team of teams">
+          
+          <span>{{ team.name  }} ({{ team.projectName || 'No project assigned' }})</span>
+         
+          <button (click)="viewTeam(team.projectid, team.id)">Go to Team</button>
+          <button (click)="deleteTeam(team.projectid, team.id)">Delete Team</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+    

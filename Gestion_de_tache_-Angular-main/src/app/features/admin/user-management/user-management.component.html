@@ -1,0 +1,54 @@
+<div class="user-management-container">
+  <h2>User Management</h2>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" [(ngModel)]="searchQuery" (input)="searchUsers()" placeholder="Search by name or email"
+      class="search-input" />
+  </div>
+
+  <!-- User Table -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Date Inscription</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <select (change)="updateUserRole(user.email, $event)">
+              <option *ngFor="let role of roles" [value]="role" [selected]="user.userRole === role">
+                {{ role }}
+              </option>
+            </select>
+            
+
+
+          </td>
+          <td>{{ user.dateInscription | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            <!-- Delete Button -->
+            <button class="btn btn-danger" (click)="deleteUser(user.email)">
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- No Data Message -->
+    <div *ngIf="filteredUsers.length === 0" class="no-data">
+      No users found.
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<section class="register">
+  
+
+  <form (ngSubmit)="onRegister()">
+    <h2>Inscrivez-vous</h2>
+    <div *ngIf="isSubmitting" class="loader"></div> <!-- Loading spinner -->
+
+    <div class="form-group">
+      <label for="username">Nom d'utilisateur</label>
+      <input id="name" [(ngModel)]="user.name" name="name" required />
+    </div>
+
+    <div class="form-group">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" [(ngModel)]="user.email" name="email" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Mot de passe</label>
+      <input id="password" type="password" [(ngModel)]="user.password" name="password" required />
+    </div>
+
+    <button type="submit" class="btn-primary" [disabled]="isSubmitting">Créer un compte</button>
+    <p class="register-link">
+      <a routerLink="/signin" class="btn">Se Connecter</a>
+    </p>
+  </form>
+
+
+</section>

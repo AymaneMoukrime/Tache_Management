@@ -204,5 +204,81 @@ public class TeamControllerTest {
         verify(teamService, times(2)).findByUser(mockUser);
     }
 
+    @Test
+    void testFindTeamsByUser_EmptyTeams() {
+        when(userDetails.getUsername()).thenReturn("test@example.com");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockUser));
+        when(teamService.findByUser(any(User.class))).thenReturn(List.of());
+
+        ResponseEntity<?> response = teamController.findteamsByUser(userDetails);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you do not have any teams", response.getBody());
+        verify(teamService, times(1)).findByUser(mockUser);
+    }
+
+    @Test
+    void testFindTeamsByUser_EmptyTeams_NotOwner() {
+        when(userDetails.getUsername()).thenReturn("test@example.com");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockUser));
+        when(teamService.findByUser(any(User.class))).thenReturn(List.of());
+
+        // Simulate the user not being the owner
+        User anotherUser = new User();
+        anotherUser.setEmail("another@example.com");
+        when(userRepository.findByEmail(eq("another@example.com"))).thenReturn(Optional.of(anotherUser));
+
+        ResponseEntity<?> response = teamController.findteamsByUser(userDetails);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("you do not have any teams", response.getBody());
+        verify(teamService, times(1)).findByUser(mockUser);
+    }
+
+    @Test
+    void testFindTeamById_NotAuthorized() {
+        Long projectId = 1L;
+        Long teamId = 1L;
+
+        when(userDetails.getUsername()).thenReturn("test@example.com");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockUser));
+        Project project = new Project();
+        project.setId(projectId);
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamService.findByid(anyLong())).thenReturn(null);
+
+        ResponseEntity<?> response = teamController.findteambyid(userDetails, projectId, teamId);
+
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals("you are not autorized to do this", response.getBody());
+        verify(projectRepository, times(1)).findById(projectId);
+        verify(teamService, times(0)).findByid(teamId);
+    }
+
+    @Test
+    void testFindTeamById_TeamNotFound() {
+        Long projectId = 1L;
+        Long teamId = 1L;
+
+        when(userDetails.getUsername()).thenReturn("test@example.com");
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockUser));
+        Project project = new Project();
+        project.setId(projectId);
+        project.getUsers().add(mockUser);
+        when(projectRepository.findById(anyLong())).thenReturn(Optional.of(project));
+        when(teamService.findByid(anyLong())).thenReturn(null);
+
+        ResponseEntity<?> response = teamController.findteambyid(userDetails, projectId, teamId);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("no team by that name", response.getBody());
+        verify(projectRepository, times(1)).findById(projectId);
+        verify(teamService, times(1)).findByid(teamId);
+    }
+
+
+
+
+
 
 }

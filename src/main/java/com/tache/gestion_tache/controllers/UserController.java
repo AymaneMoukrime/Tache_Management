@@ -94,7 +94,7 @@ public class UserController {
     }
 
     // Helper method to determine the image MIME type
-    private MediaType getImageMediaType(byte[] imageBytes) {
+    public MediaType getImageMediaType(byte[] imageBytes) {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes)) {
             BufferedImage img = ImageIO.read(bis); // Try to read the image
             if (img == null) {

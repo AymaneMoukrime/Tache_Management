@@ -1,0 +1,32 @@
+<section class="login">
+  <div class="login-box">
+    <h2>Se Connecter :</h2>
+    <form>
+      <label for="email">E-mail</label>
+      <input
+        type="email"
+        id="email"
+        [(ngModel)]="authRequest.email"
+        placeholder="Entrez votre e-mail"
+        name="email"
+      />
+
+      <label for="password">Mot de passe</label>
+      <input
+        type="password"
+        id="password"
+        [(ngModel)]="authRequest.password"
+        placeholder="Entrez votre mot de passe"
+        name="password"
+      />
+
+      
+
+      <button type="button" class="btn-primary" (click)="onLogin()">Se Connecter</button>
+
+      <p class="register-link">
+        Vous n'avez pas de compte ? <a routerLink="/signup" class="btn">S'inscrire</a>
+      </p>
+    </form>
+  </div>
+</section>

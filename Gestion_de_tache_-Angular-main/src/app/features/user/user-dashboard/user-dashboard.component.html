@@ -1,0 +1,50 @@
+<div class="layout-container">
+  <!-- Dashboard Content -->
+  <div class="dashboard-content">
+    <h2 class="dashboard-title">Your Projects</h2>
+
+    <!-- No Owned Projects Message -->
+    <div *ngIf="ownedProjects.length === 0" class="no-projects">
+      <p>You have no owned projects.</p>
+    </div>
+
+    <!-- Owned Projects Section -->
+    <div *ngIf="ownedProjects.length > 0" class="projects-section">
+      <h3 class="section-title">My Projects</h3>
+      <div class="projects-grid">
+        <div *ngFor="let project of ownedProjects" class="project-card">
+          <button class="edit-button" (click)="viewProject(project.id)">Update</button>
+          <button class="delete-button" (click)="deleteProject(project.id)">Delete</button>
+          <h3 class="project-title">{{ project.name }}</h3>
+          <p class="project-description">{{ project.description }}</p>
+          <div class="project-meta">
+            <span class="meta-item">Created: {{ project.startDate | date }}</span>
+            <span class="meta-item">Owner Name: {{ project.owner?.name || 'No owner assigned' }}</span>
+          </div>
+          <button class="view-button" (click)="ProjectPage(project.id)">View Project</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Other Projects Message -->
+    <div *ngIf="otherProjects.length === 0" class="no-projects">
+      <p>No projects available that you don't own.</p>
+    </div>
+
+    <!-- Other Projects Section -->
+    <div *ngIf="otherProjects.length > 0" class="projects-section">
+      <h3 class="section-title">Other Projects</h3>
+      <div class="projects-grid">
+        <div *ngFor="let project of otherProjects" class="project-card">
+          <h3 class="project-title">{{ project.name }}</h3>
+          <p class="project-description">{{ project.description }}</p>
+          <div class="project-meta">
+            <span class="meta-item">Created: {{ project.startDate | date }}</span>
+            <span class="meta-item">Owner Name: {{ project.owner?.name || 'No owner assigned' }}</span>
+          </div>
+          <button class="view-button" (click)="ProjectPage(project.id)">View Project</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

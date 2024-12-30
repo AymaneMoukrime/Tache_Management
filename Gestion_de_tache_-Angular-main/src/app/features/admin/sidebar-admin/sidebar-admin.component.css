@@ -1,0 +1,70 @@
+/* General Sidebar Styling */
+.admin-panel {
+  height: 100vh;
+  width: 240px;
+  background-color: #f8f9fa;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Title Styling */
+.admin-panel h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Navigation Menu */
+.admin-panel nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-panel nav ul li {
+  margin-bottom: 15px;
+}
+
+.admin-panel nav ul li a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  display: block;
+  transition: all 0.3s ease-in-out;
+}
+
+.admin-panel nav ul li a:hover {
+  color: #007bff;
+  padding-left: 5px;
+}
+
+/* Active Link */
+.admin-panel nav ul li a.active {
+  color: #007bff;
+  border-left: 3px solid #007bff;
+  padding-left: 8px;
+}
+
+/* Fix for Content Layout */
+.content {
+  margin-left: 260px;
+  padding: 20px;
+}
+
+/* Optional: For smaller screens */
+@media (max-width: 768px) {
+  .admin-panel {
+    width: 100%;
+    height: auto;
+    box-shadow: none;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 10px;
+  }
+}

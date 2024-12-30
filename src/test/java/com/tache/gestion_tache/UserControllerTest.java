@@ -14,10 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -152,4 +156,28 @@ public class UserControllerTest {
         assertEquals(teamDtos, response.getBody());
         verify(userService, times(1)).getUserTeams(userDetails);
     }
+
+    @Test
+    public void testGetImageMediaType_PNG() throws IOException {
+        byte[] imageBytes = createImageBytes("png");
+        MediaType mediaType = userController.getImageMediaType(imageBytes);
+        assertEquals(MediaType.IMAGE_PNG, mediaType);
+    }
+
+    @Test
+    public void testGetImageMediaType_InvalidImage() {
+        byte[] imageBytes = new byte[0];
+        MediaType mediaType = userController.getImageMediaType(imageBytes);
+        assertEquals(MediaType.APPLICATION_OCTET_STREAM, mediaType);
+    }
+
+    private byte[] createImageBytes(String format) throws IOException {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, format, baos);
+        return baos.toByteArray();
+    }
+
+
+
 }

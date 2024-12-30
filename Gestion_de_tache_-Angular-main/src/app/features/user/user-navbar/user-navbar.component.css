@@ -1,0 +1,41 @@
+/* Navbar Styles */
+.navbar-container {
+  height: 60px;
+  background: linear-gradient(to right, #2575fc, #6a11cb);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999; /* Ensures navbar is above everything */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Navbar Left Section */
+.navbar-left {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Navbar Right Section */
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-right .user-name {
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+.navbar-right .user-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
